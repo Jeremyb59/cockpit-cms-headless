@@ -28,13 +28,14 @@
                 </kiss-card>
 
                 <div>
-                    <a class="kiss-size-large" kiss-popoutmenu="#model-menu-actions">
+                    <a class="kiss-size-large" kiss-popout="#model-menu-actions">
                         <icon>more_horiz</icon>
                     </a>
                 </div>
             </div>
 
             <div class="kiss-margin" :class="{'kiss-disabled': !(fieldTypes && ((!loading && items.length) || filter || state !== false))}">
+
                 <form class="kiss-flex kiss-flex-middle" @submit.prevent="filter = txtFilter">
 
                     <input type="text" class="kiss-input kiss-flex-1 kiss-margin-xsmall-right" :placeholder="t('Filter items...')" v-model="txtFilter">
@@ -116,7 +117,7 @@
                                     <a class="kiss-cover" @click="sortItems('_created')"></a>
                                 </th>
                                 <th fixed="right" width="20">
-                                    <a class="kiss-size-4" :class="model.fields.length != visibleFields.length ? 'kiss-color-danger': 'kiss-link-muted'" kiss-popoutmenu="#model-column-options">
+                                    <a class="kiss-size-4" :class="model.fields.length != visibleFields.length ? 'kiss-color-danger': 'kiss-link-muted'" kiss-popout="#model-column-options">
                                         <icon>more_horiz</icon>
                                     </a>
                                 </th>
@@ -193,7 +194,7 @@
 
             <teleport to="body">
 
-                <kiss-popoutmenu :open="actionItem && 'true'" @popoutmenuclose="toggleItemActions(null)">
+                <kiss-popout :open="actionItem && 'true'" @popoutclose="toggleItemActions(null)">
                     <kiss-content>
                         <kiss-navlist v-if="actionItem">
                             <ul>
@@ -202,6 +203,12 @@
                                     <a class="kiss-flex kiss-flex-middle" :href="$route(`/content/collection/item/${model.name}/${actionItem._id}`)">
                                         <icon class="kiss-margin-small-right">create</icon>
                                         <?= t('Edit') ?>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="kiss-flex kiss-flex-middle" :href="$route(`/content/collection/clone/${model.name}/${actionItem._id}`)">
+                                        <icon class="kiss-margin-small-right">control_point_duplicate</icon>
+                                        <?=t('Clone')?>
                                     </a>
                                 </li>
                                 <li class="kiss-nav-divider"></li>
@@ -214,9 +221,9 @@
                             </ul>
                         </kiss-navlist>
                     </kiss-content>
-                </kiss-popoutmenu>
+                </kiss-popout>
 
-                <kiss-popoutmenu id="model-column-options" modal="true">
+                <kiss-popout id="model-column-options" modal="true">
                     <kiss-content>
                         <kiss-navlist class="kiss-margin">
                             <ul>
@@ -234,12 +241,12 @@
                             </ul>
                         </kiss-navlist>
 
-                        <button type="button" class="kiss-button kiss-button-small kiss-width-1-1 kiss-margin-small-top" kiss-popoutmenu-close><?= t('Close') ?></button>
+                        <button type="button" class="kiss-button kiss-button-small kiss-width-1-1 kiss-margin-small-top" kiss-popout-close><?= t('Close') ?></button>
                     </kiss-content>
-                </kiss-popoutmenu>
+                </kiss-popout>
 
                 <?php if ($this->helper('acl')->isAllowed("content/{$model['name']}/publish")): ?>
-                <kiss-popoutmenu id="model-items-menu-state" ref="stateChooser">
+                <kiss-popout id="model-items-menu-state" ref="stateChooser">
                     <kiss-content>
 
                         <kiss-navlist class="kiss-margin-small">
@@ -268,10 +275,10 @@
                             </ul>
                         </kiss-navlist>
                     </kiss-content>
-                </kiss-popoutmenu>
+                </kiss-popout>
                 <?php endif ?>
 
-                <kiss-popoutmenu id="model-menu-actions">
+                <kiss-popout id="model-menu-actions">
                     <kiss-content>
                         <kiss-navlist class="kiss-margin">
                             <ul>
@@ -307,7 +314,7 @@
                             </ul>
                         </kiss-navlist>
                     </kiss-content>
-                </kiss-popoutmenu>
+                </kiss-popout>
 
             </teleport>
 

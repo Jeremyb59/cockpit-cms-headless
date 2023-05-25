@@ -75,9 +75,7 @@ class Directive
         $this->config = $config;
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function includeDirective(): Directive
     {
         $internal = self::getInternalDirectives();
@@ -129,6 +127,8 @@ class Directive
                 'locations' => [
                     DirectiveLocation::FIELD_DEFINITION,
                     DirectiveLocation::ENUM_VALUE,
+                    DirectiveLocation::ARGUMENT_DEFINITION,
+                    DirectiveLocation::INPUT_FIELD_DEFINITION,
                 ],
                 'args' => [
                     self::REASON_ARGUMENT_NAME => [
@@ -141,9 +141,7 @@ class Directive
         ];
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function skipDirective(): Directive
     {
         $internal = self::getInternalDirectives();
@@ -151,9 +149,7 @@ class Directive
         return $internal['skip'];
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function deprecatedDirective(): Directive
     {
         $internal = self::getInternalDirectives();
@@ -161,9 +157,7 @@ class Directive
         return $internal['deprecated'];
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function isSpecifiedDirective(Directive $directive): bool
     {
         return \array_key_exists($directive->name, self::getInternalDirectives());

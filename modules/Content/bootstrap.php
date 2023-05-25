@@ -8,6 +8,12 @@ $this->on('app.admin.init', function() {
     include(__DIR__.'/admin.php');
 });
 
+// load cli related code
+$this->on('app.cli.init', function($cli) {
+    $app = $this;
+    include(__DIR__.'/cli.php');
+});
+
 // load api request related code
 $this->on('app.api.request', function() {
     include(__DIR__.'/api.php');
@@ -258,13 +264,13 @@ $this->module('content')->extend([
             return null;
         }
 
-        $this->app->trigger('content.item.save.before', [$modelName, &$item, $isUpdate]);
-        $this->app->trigger("content.item.save.before.{$modelName}", [&$item, $isUpdate]);
+        $this->app->trigger('content.item.save.before', [$modelName, &$item, $isUpdate, $collection]);
+        $this->app->trigger("content.item.save.before.{$modelName}", [&$item, $isUpdate, $collection]);
 
         $this->app->dataStorage->save($collection, $item);
 
-        $this->app->trigger('content.item.save', [$modelName, $item, $isUpdate]);
-        $this->app->trigger("content.item.save.{$modelName}", [&$item, $isUpdate]);
+        $this->app->trigger('content.item.save', [$modelName, $item, $isUpdate, $collection]);
+        $this->app->trigger("content.item.save.{$modelName}", [$item, $isUpdate, $collection]);
 
         return $item;
     },
@@ -320,11 +326,11 @@ $this->module('content')->extend([
 
         $items = (array) $this->app->dataStorage->find($collection, $options);
 
-        if (isset($process['locale'])) {
+        if ($process['locale'] ?? false) {
             $items = $this->app->helper('locales')->applyLocales($items, $process['locale']);
         }
 
-        if (isset($process['populate']) && $process['populate']) {
+        if ($process['populate'] ?? false) {
             $items = $this->populate($items, $process['populate'], 0, $process);
         }
 
@@ -344,6 +350,8 @@ $this->module('content')->extend([
         }
 
         $collection = "content/collections/{$modelName}";
+
+        $this->app->trigger('content.remove.before', [$modelName, &$filter, $collection]);
 
         $result = $this->app->dataStorage->remove($collection, $filter);
 

@@ -93,6 +93,15 @@ class Index {
                     $value = $this->stringify((array)$value);
                 }
 
+                if (!is_string($value)) {
+                    $value = is_null($value) ? null : (string)$value;
+                }
+
+                // does value contain html?
+                if (preg_match('/<[^>]+>/', $value)) {
+                    $value = strip_tags(preg_replace('/\<br(\s*)?\/?\>/i', "\n", $value));
+                }
+
                 $data[":{$field}"] = $value;
             }
 
@@ -138,6 +147,8 @@ class Index {
     }
 
     public function search(string $query, array $options = []) {
+
+        $start = microtime(true);
 
         $options = array_merge([
             'fields' => '*',
@@ -199,7 +210,24 @@ class Index {
             }
         }
 
-        return $items;
+        $count = count($items);
+
+        if ($options['offset'] || $count === $options['limit']) {
+            $count = $this->countDocuments($query);
+        }
+
+        $processingTimeMs = (microtime(true) - $start) * 1000;
+
+        $result = [
+            'hits' => $items,
+            'query' => $query,
+            'processingTimeMs' => $processingTimeMs,
+            'limit' => $options['limit'],
+            'offset' => $options['offset'],
+            'estimatedTotalHits' => $count,
+        ];
+
+        return $result;
     }
 
     public function facetSearch($query, $facetField, $options = []) {
@@ -246,13 +274,13 @@ class Index {
 
                 $field = $match[1];
                 $value = trim($match[2], '\'"');
-                $fields[$field] = $value;
+                $fields[$field] = $this->escapeFts5SpecialChars($value);
             }
 
         } else {
 
             foreach ($_fields as $field) {
-                $fields[$field] = $query;
+                $fields[$field] = $this->escapeFts5SpecialChars($query);
             }
         }
 
@@ -276,6 +304,31 @@ class Index {
         return implode(' OR ', $searchQueries);
     }
 
+    private function escapeFts5SpecialChars($query) {
+        // Define the special characters that need to be escaped in FTS5 queries
+        $specialChars = '.-@';
+
+        // Split the query string into individual terms
+        $terms = preg_split('/\s+/', $query);
+
+        // Iterate through the terms and escape special characters and double quotes
+        $escapedTerms = array_map(function ($term) use ($specialChars) {
+            // Replace double quotes with two double quotes
+            $escapedTerm = str_replace('"', '""', $term);
+
+            // Escape special characters with double quotes
+            $pattern = '/([' . preg_quote($specialChars, '/') . '])/';
+            $escapedTerm = preg_replace($pattern, '"$1"', $escapedTerm);
+
+            return $escapedTerm;
+        }, $terms);
+
+        // Combine the escaped terms back into a single query string
+        $escapedQuery = implode(' ', $escapedTerms);
+
+        return $escapedQuery;
+    }
+
     private function buildInsertQuery() {
 
         $fields = $this->fields;
@@ -290,35 +343,28 @@ class Index {
         return "INSERT INTO documents ({$fieldsString}) VALUES ({$placeholdersString})";
     }
 
-    protected function stringify(mixed $value): string {
+    protected function stringify(mixed $input): string {
 
-        if (\is_string($value)) {
-            return $value;
+        $str = [];
+
+        if (is_string($input)) {
+            return $input;
         }
 
-        if (!$value) {
+        if (!(is_array($input) || !is_object($input))) {
             return '';
         }
 
-        if (\is_numeric($value)) {
-            return $value.'';
+        foreach ($input as $value) {
+
+            if (is_string($value)) {
+                $str[] = $value;
+            } elseif (is_array($value) || is_object($value)) {
+                $str[] = $this->stringify($value);
+            }
         }
 
-        if (\is_array($value)) {
-
-            $str = [];
-
-            array_walk_recursive($value, function($val) use(&$str) {
-
-                if (is_string($val) && strlen($val) >= 5) {
-                    $str[] = $val;
-                }
-            });
-
-            return implode(' ', $str);
-        }
-
-        return '';
+        return implode(' ', $str);
     }
 
     public function updateIndexedFields($fields, ?string $tokenizer = null) {

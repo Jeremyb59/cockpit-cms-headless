@@ -96,7 +96,7 @@ class Introspection
     fields(includeDeprecated: true) {
       name
       {$descriptions}
-      args {
+      args(includeDeprecated: true) {
         ...InputValue
       }
       type {
@@ -105,7 +105,7 @@ class Introspection
       isDeprecated
       deprecationReason
     }
-    inputFields {
+    inputFields(includeDeprecated: true) {
       ...InputValue
     }
     interfaces {
@@ -127,6 +127,8 @@ class Introspection
     {$descriptions}
     type { ...TypeRef }
     defaultValue
+    isDeprecated
+    deprecationReason
   }
 
   fragment TypeRef on __Type {
@@ -230,9 +232,7 @@ GRAPHQL;
         ];
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _schema(): ObjectType
     {
         return self::$map['__Schema'] ??= new ObjectType([
@@ -272,9 +272,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _type(): ObjectType
     {
         return self::$map['__Type'] ??= new ObjectType([
@@ -396,9 +394,29 @@ GRAPHQL;
                 ],
                 'inputFields' => [
                     'type' => Type::listOf(Type::nonNull(self::_inputValue())),
-                    'resolve' => static fn ($type): ?array => $type instanceof InputObjectType
-                        ? $type->getFields()
-                        : null,
+                    'args' => [
+                        'includeDeprecated' => [
+                            'type' => Type::boolean(),
+                            'defaultValue' => false,
+                        ],
+                    ],
+                    'resolve' => static function ($type, $args): ?array {
+                        if ($type instanceof InputObjectType) {
+                            $fields = $type->getFields();
+
+                            if (! ($args['includeDeprecated'] ?? false)) {
+                                return \array_filter(
+                                    $fields,
+                                    static fn (InputObjectField $field): bool => $field->deprecationReason === null
+                                        || $field->deprecationReason === '',
+                                );
+                            }
+
+                            return $fields;
+                        }
+
+                        return null;
+                    },
                 ],
                 'ofType' => [
                     'type' => self::_type(),
@@ -410,9 +428,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _typeKind(): EnumType
     {
         return self::$map['__TypeKind'] ??= new EnumType([
@@ -456,9 +472,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _field(): ObjectType
     {
         return self::$map['__Field'] ??= new ObjectType([
@@ -477,7 +491,25 @@ GRAPHQL;
                 ],
                 'args' => [
                     'type' => Type::nonNull(Type::listOf(Type::nonNull(self::_inputValue()))),
-                    'resolve' => static fn (FieldDefinition $field): array => $field->args,
+                    'args' => [
+                        'includeDeprecated' => [
+                            'type' => Type::boolean(),
+                            'defaultValue' => false,
+                        ],
+                    ],
+                    'resolve' => static function (FieldDefinition $field, $args): array {
+                        $values = $field->args;
+
+                        if (! ($args['includeDeprecated'] ?? false)) {
+                            return \array_filter(
+                                $values,
+                                static fn (Argument $value): bool => $value->deprecationReason === null
+                                    || $value->deprecationReason === '',
+                            );
+                        }
+
+                        return $values;
+                    },
                 ],
                 'type' => [
                     'type' => Type::nonNull(self::_type()),
@@ -496,9 +528,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _inputValue(): ObjectType
     {
         return self::$map['__InputValue'] ??= new ObjectType([
@@ -542,13 +572,22 @@ GRAPHQL;
                         return null;
                     },
                 ],
+                'isDeprecated' => [
+                    'type' => Type::nonNull(Type::boolean()),
+                    /** @param Argument|InputObjectField $inputValue */
+                    'resolve' => static fn ($inputValue): bool => $inputValue->deprecationReason !== null
+                        && $inputValue->deprecationReason !== '',
+                ],
+                'deprecationReason' => [
+                    'type' => Type::string(),
+                    /** @param Argument|InputObjectField $inputValue */
+                    'resolve' => static fn ($inputValue): ?string => $inputValue->deprecationReason,
+                ],
             ],
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _enumValue(): ObjectType
     {
         return self::$map['__EnumValue'] ??= new ObjectType([
@@ -579,9 +618,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _directive(): ObjectType
     {
         return self::$map['__Directive'] ??= new ObjectType([
@@ -620,9 +657,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function _directiveLocation(): EnumType
     {
         return self::$map['__DirectiveLocation'] ??= new EnumType([
@@ -711,9 +746,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function schemaMetaFieldDef(): FieldDefinition
     {
         return self::$map[self::SCHEMA_FIELD_NAME] ??= new FieldDefinition([
@@ -725,9 +758,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function typeMetaFieldDef(): FieldDefinition
     {
         return self::$map[self::TYPE_FIELD_NAME] ??= new FieldDefinition([
@@ -744,9 +775,7 @@ GRAPHQL;
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     public static function typeNameMetaFieldDef(): FieldDefinition
     {
         return self::$map[self::TYPE_NAME_FIELD_NAME] ??= new FieldDefinition([

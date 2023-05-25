@@ -1,10 +1,42 @@
 # Release Notes
 
-## WIP
+# WIP
+
+- Try to auto-generate meaningful linked content preview if display setting is missing
+- Update Vue to v3.3.4
+- Add missing permission settings @raffaelj
+- Improve role permissions UI
+
+## 2.5.2 (2023-05-18)
+
+- Fix link content item dialog
+- Update vendor libs
+
+## 2.5.1 (2023-05-15)
+
+- Fix js error thrown in dialog component
+- Remove 2FA info from internal users/load api
+- Update icons
+- Minor UI improvements
+- add `content.remove.before` event
+- Refactor `kiss-popoutmenu` component to `kiss-popout`
+- Introduce `user-info` component
+- Update Vue to v3.3.2
+- Update vendor libs
+
+## 2.5.0 (2023-04-15)
 
 - Fix initial item position on tree item creation
 - Add avif image type support (depending on used GD lib)
 - Add experimental natural language to mongo query support (only for admin ui filtering collection items and assets)
+- Add lightweight indexing library (for full-text search)
+- Make logged login data configurable
+- Add filter models feature on role permission page
+- Fix populate option singleton data queries via GraphQL
+- Clone / duplicate collection items
+- Refactor admin ui language loading
+- Add `content:field:remove` and `content:field:rename` tower cli commands to cleanup content data after model changes
+
 
 ## 2.4.1 (2023-03-20)
 

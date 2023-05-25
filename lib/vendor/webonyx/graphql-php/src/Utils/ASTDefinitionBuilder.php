@@ -101,9 +101,7 @@ class ASTDefinitionBuilder
         $this->cache = Type::builtInTypes();
     }
 
-    /**
-     * @throws \Exception
-     */
+    /** @throws \Exception */
     public function buildDirective(DirectiveDefinitionNode $directiveNode): Directive
     {
         $locations = [];
@@ -143,6 +141,7 @@ class ASTDefinitionBuilder
                 'name' => $value->name->value,
                 'type' => $type,
                 'description' => $value->description->value ?? null,
+                'deprecationReason' => $this->getDeprecationReason($value),
                 'astNode' => $value,
             ];
 
@@ -326,9 +325,7 @@ class ASTDefinitionBuilder
         }
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     private function makeTypeDef(ObjectTypeDefinitionNode $def): ObjectType
     {
         $name = $def->name->value;
@@ -392,7 +389,7 @@ class ASTDefinitionBuilder
      * Given a collection of directives, returns the string value for the
      * deprecation reason.
      *
-     * @param EnumValueDefinitionNode|FieldDefinitionNode $node
+     * @param EnumValueDefinitionNode|FieldDefinitionNode|InputValueDefinitionNode $node
      *
      * @throws \Exception
      * @throws \ReflectionException
@@ -434,9 +431,7 @@ class ASTDefinitionBuilder
         return $interfaces;
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     private function makeInterfaceDef(InterfaceTypeDefinitionNode $def): InterfaceType
     {
         $name = $def->name->value;
@@ -485,9 +480,7 @@ class ASTDefinitionBuilder
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     private function makeUnionDef(UnionTypeDefinitionNode $def): UnionType
     {
         $name = $def->name->value;
@@ -516,9 +509,7 @@ class ASTDefinitionBuilder
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     private function makeScalarDef(ScalarTypeDefinitionNode $def): CustomScalarType
     {
         $name = $def->name->value;
@@ -534,9 +525,7 @@ class ASTDefinitionBuilder
         ]);
     }
 
-    /**
-     * @throws InvariantViolation
-     */
+    /** @throws InvariantViolation */
     private function makeInputObjectDef(InputObjectTypeDefinitionNode $def): InputObjectType
     {
         $name = $def->name->value;
