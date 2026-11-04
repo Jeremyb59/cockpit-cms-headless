@@ -33,21 +33,28 @@ class Ffmpeg {
 
         $options['scan'] = intval($options['scan']);
 
-        $command = "{$this->binary} -hwaccel auto -i '{$options['src']}' -vf 'thumbnail=n={$options['scan']}' -frames:v 1 '{$dest}'";
-
-        $process = Process::fromShellCommandline($command);
+        $process = new Process([
+            $this->binary,
+            '-hwaccel',
+            'auto',
+            '-i',
+            $this->normalizeArgument($options['src'], 'src'),
+            '-vf',
+            "thumbnail=n={$options['scan']}",
+            '-frames:v',
+            '1',
+            $dest
+        ]);
         $process->setTimeout(25);
         $process->run();
     }
 
     public function getVideoMeta(string $src): ?array {
 
-        $command = "{$this->binary} -i '{$src}' 2>&1";
-
-        $process = Process::fromShellCommandline($command);
+        $process = new Process([$this->binary, '-i', $src]);
         $process->run();
 
-        $output = $process->getOutput();
+        $output = $process->getOutput()."\n".$process->getErrorOutput();
 
         $meta = [
             'duration' => null,
@@ -106,7 +113,7 @@ class Ffmpeg {
      * 'audio_channels' => 2,            // e.g., -ac 2
      * 'hwaccel' => 'auto',              // e.g., -hwaccel auto (set to null or false to disable)
      * 'overwrite' => true,              // e.g., -y (overwrite output file if it exists)
-     * 'raw' => '',                      // e.g., '-movflags +faststart -profile:v main' (additional raw ffmpeg flags)
+     * 'raw' => ['-movflags', '+faststart', '-profile:v', 'main'], // Additional ffmpeg arguments
      * 'timeout' => 3600,                // Process timeout in seconds (default: 1 hour)
      * ]
      * @return void
@@ -136,27 +143,28 @@ class Ffmpeg {
             'format' => null,             // Output container format (e.g., 'mp4', 'webm')
             'pixel_format' => null,       // Pixel format (e.g., 'yuv420p' for compatibility)
             'audio_channels' => null,     // Number of audio channels (e.g., 1 for mono, 2 for stereo)
-            'raw' => '',                  // Any additional ffmpeg command line options as a string
+            'raw' => '',                  // Additional ffmpeg arguments as array; string is split for compatibility
         ];
 
         // Merge user configuration with defaults
         $config = array_merge($defaultConfig, $config);
 
-        // Start building the ffmpeg command
-        $commandParts = [$this->binary];
+        $args = [$this->binary];
 
         // Add hardware acceleration if specified
         if ($config['hwaccel']) {
-            $commandParts[] = "-hwaccel {$config['hwaccel']}";
+            $args[] = '-hwaccel';
+            $args[] = $this->normalizeArgument($config['hwaccel'], 'hwaccel');
         }
 
         // Add overwrite flag if enabled
         if ($config['overwrite']) {
-            $commandParts[] = "-y";
+            $args[] = '-y';
         }
 
         // Add input file (source path)
-        $commandParts[] = "-i " . escapeshellarg($srcPath);
+        $args[] = '-i';
+        $args[] = $srcPath;
 
         // Map configuration keys to FFMPEG options and their flags
         $simpleOptionMap = [
@@ -173,34 +181,126 @@ class Ffmpeg {
         ];
 
         foreach ($simpleOptionMap as $key => $flag) {
-            if (isset($config[$key])) $commandParts[] = "{$flag} {$config[$key]}";
+            if ($this->hasArgumentValue($config[$key])) {
+                $args[] = $flag;
+                $args[] = $this->normalizeArgument($config[$key], $key);
+            }
         }
 
         // Video filter (-vf) construction
         $vfArguments = [];
 
         // Handle scaling: 'scale' takes precedence over 'resolution'
-        if (isset($config['scale'])) {
+        if ($this->hasArgumentValue($config['scale'])) {
             $vfArguments[] = "scale={$config['scale']}";
         }
 
         if (!empty($vfArguments)) {
-            $commandParts[] = "-vf '" . implode(',', $vfArguments) . "'";
-        } elseif (isset($config['resolution'])) {
-            $commandParts[] = "-s {$config['resolution']}";
+            $args[] = '-vf';
+            $args[] = implode(',', $vfArguments);
+        } elseif ($this->hasArgumentValue($config['resolution'])) {
+            $args[] = '-s';
+            $args[] = $this->normalizeArgument($config['resolution'], 'resolution');
         }
 
         if (!empty($config['raw'])) {
-            $commandParts[] = $config['raw'];
+            array_push($args, ...$this->normalizeExtraArguments($config['raw']));
         }
 
-        $commandParts[] = escapeshellarg($destPath);
+        $args[] = $destPath;
 
-        $command = implode(' ', $commandParts);
-        $process = Process::fromShellCommandline($command);
-        $process->setTimeout($config['timeout']);
+        $process = new Process($args);
+        $process->setTimeout($this->normalizeTimeout($config['timeout']));
 
         // mustRun() throws a ProcessFailedException on failure (non-zero exit code)
         $process->mustRun();
+    }
+
+    protected function hasArgumentValue(mixed $value): bool {
+
+        return $value !== null && $value !== false && $value !== '';
+    }
+
+    protected function normalizeArgument(mixed $value, string $name): string {
+
+        if (\is_bool($value) || \is_array($value) || \is_object($value) || \is_resource($value)) {
+            throw new \InvalidArgumentException("Invalid FFmpeg argument value for {$name}");
+        }
+
+        return (string)$value;
+    }
+
+    protected function normalizeTimeout(mixed $value): ?float {
+
+        if ($value === null || $value === false) {
+            return null;
+        }
+
+        if (!\is_numeric($value)) {
+            throw new \InvalidArgumentException('Invalid FFmpeg timeout value');
+        }
+
+        return (float)$value;
+    }
+
+    protected function normalizeExtraArguments(mixed $raw): array {
+
+        if (\is_array($raw)) {
+            return array_map(fn($arg) => $this->normalizeArgument($arg, 'raw'), array_values($raw));
+        }
+
+        if (\is_string($raw)) {
+            return $this->splitExtraArguments($raw);
+        }
+
+        throw new \InvalidArgumentException('Invalid FFmpeg raw argument list');
+    }
+
+    protected function splitExtraArguments(string $raw): array {
+
+        $raw = trim($raw);
+
+        if ($raw === '') {
+            return [];
+        }
+
+        $args = [];
+        $current = '';
+        $quote = null;
+        $length = strlen($raw);
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $raw[$i];
+
+            if ($quote === null && ctype_space($char)) {
+                if ($current !== '') {
+                    $args[] = $current;
+                    $current = '';
+                }
+                continue;
+            }
+
+            if (($char === '"' || $char === "'") && ($quote === null || $quote === $char)) {
+                $quote = $quote === null ? $char : null;
+                continue;
+            }
+
+            if ($char === '\\' && $i + 1 < $length && $quote !== "'") {
+                $current .= $raw[++$i];
+                continue;
+            }
+
+            $current .= $char;
+        }
+
+        if ($quote !== null) {
+            throw new \InvalidArgumentException('Unterminated FFmpeg raw argument quote');
+        }
+
+        if ($current !== '') {
+            $args[] = $current;
+        }
+
+        return $args;
     }
 }

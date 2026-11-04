@@ -1,3 +1,5 @@
+let appTagsInstanceCount = 0;
+
 customElements.define('app-tags', class extends HTMLElement {
     constructor() {
         super();
@@ -5,9 +7,13 @@ customElements.define('app-tags', class extends HTMLElement {
         this.selectedSuggestionIndex = -1;
         this.filteredSuggestions = [];
         this.normalizedSuggestions = [];
+        this._listId = `app-tags-listbox-${++appTagsInstanceCount}`;
+        this._lastAutoAriaLabel = null;
 
         this.dropdown = document.createElement('div');
         this.dropdown.className = 'app-tags-input-autocomplete-dropdown';
+        this.dropdown.id = this._listId;
+        this.dropdown.setAttribute('role', 'listbox');
         this.dropdown.style.display = 'none';
         document.body.appendChild(this.dropdown);
 
@@ -56,6 +62,7 @@ customElements.define('app-tags', class extends HTMLElement {
                 case 'placeholder':
                     if (this.input) {
                         this.input.placeholder = this.placeholder;
+                        this.setupInputAccessibility();
                     }
                     break;
                 }
@@ -65,6 +72,7 @@ customElements.define('app-tags', class extends HTMLElement {
     connectedCallback() {
         this.render();
         this.setupEventListeners();
+        this.setupInputAccessibility();
         this.normalizeSuggestions();
     }
 
@@ -86,6 +94,29 @@ customElements.define('app-tags', class extends HTMLElement {
 
         this.input = this.querySelector('.app-tags-input');
         this.tagList = this.querySelector('.app-tags-list');
+    }
+
+    setupInputAccessibility() {
+
+        if (!this.input) {
+            return;
+        }
+
+        if (!this.input.hasAttribute('role')) {
+            this.input.setAttribute('role', 'combobox');
+        }
+
+        const currentAriaLabel = this.input.getAttribute('aria-label');
+
+        if (!this.input.hasAttribute('aria-labelledby') && (!currentAriaLabel || currentAriaLabel === this._lastAutoAriaLabel)) {
+            this.input.setAttribute('aria-label', this.placeholder);
+            this._lastAutoAriaLabel = this.placeholder;
+        }
+
+        this.input.setAttribute('aria-autocomplete', 'list');
+        this.input.setAttribute('aria-haspopup', 'listbox');
+        this.input.setAttribute('aria-controls', this._listId);
+        this.input.setAttribute('aria-expanded', 'false');
     }
 
     setupEventListeners() {
@@ -235,32 +266,54 @@ customElements.define('app-tags', class extends HTMLElement {
     }
 
     showDropdown() {
+        if (!this.dropdown.parentNode) {
+            document.body.appendChild(this.dropdown);
+        }
+
         this.dropdown.style.display = 'block';
         this.renderDropdown();
         this.updateDropdownPosition();
+        this.input.setAttribute('aria-expanded', 'true');
     }
 
     hideDropdown() {
         this.dropdown.style.display = 'none';
         this.selectedSuggestionIndex = -1;
+
+        if (this.input) {
+            this.input.setAttribute('aria-expanded', 'false');
+            this.input.removeAttribute('aria-activedescendant');
+        }
     }
 
     renderDropdown() {
-        this.dropdown.innerHTML = this.filteredSuggestions
-            .map((suggestion, index) => `
-                <div class="app-tags-autocomplete-item ${index === this.selectedSuggestionIndex ? 'selected' : ''}"
-                     data-index="${index}">
-                    ${suggestion.label}
-                </div>
-            `)
-            .join('');
+        this.dropdown.innerHTML = '';
 
-        this.dropdown.querySelectorAll('.app-tags-autocomplete-item').forEach(item => {
+        this.filteredSuggestions.forEach((suggestion, index) => {
+            const item = document.createElement('div');
+            const selected = index === this.selectedSuggestionIndex;
+
+            item.className = `app-tags-autocomplete-item ${selected ? 'selected' : ''}`;
+            item.dataset.index = String(index);
+            item.id = `${this._listId}-option-${index}`;
+            item.textContent = suggestion.label;
+            item.setAttribute('role', 'option');
+            item.setAttribute('aria-selected', selected ? 'true' : 'false');
             item.addEventListener('click', () => {
                 const index = parseInt(item.dataset.index);
                 this.addTag(this.filteredSuggestions[index].value);
             });
+            this.dropdown.appendChild(item);
         });
+
+        if (this.selectedSuggestionIndex !== -1) {
+            const selectedItem = this.dropdown.children[this.selectedSuggestionIndex];
+            if (selectedItem) {
+                this.input.setAttribute('aria-activedescendant', selectedItem.id);
+            }
+        } else if (this.input) {
+            this.input.removeAttribute('aria-activedescendant');
+        }
     }
 
     moveSelection(direction) {
@@ -279,6 +332,7 @@ customElements.define('app-tags', class extends HTMLElement {
         // Ensure selected item is visible in dropdown
         const selectedItem = this.dropdown.children[this.selectedSuggestionIndex];
         if (selectedItem) {
+            this.input.setAttribute('aria-activedescendant', selectedItem.id);
             selectedItem.scrollIntoView({ block: 'nearest' });
         }
     }
@@ -300,17 +354,36 @@ customElements.define('app-tags', class extends HTMLElement {
             return;
         }
 
+        const label = this.getLabelForValue(value);
         const tagElement = document.createElement('div');
         tagElement.className = 'app-tags-tag';
-        tagElement.innerHTML = `
-            <span class="app-tags-tag-text">${this.getLabelForValue(value)}</span>
-            <span class="app-tags-tag-remove">×</span>
-        `;
 
-        tagElement.querySelector('.app-tags-tag-remove').addEventListener('click', () => {
+        const textElement = document.createElement('span');
+        textElement.className = 'app-tags-tag-text';
+        textElement.textContent = label;
+
+        const removeElement = document.createElement('span');
+        removeElement.className = 'app-tags-tag-remove';
+        removeElement.textContent = '×';
+        removeElement.setAttribute('role', 'button');
+        removeElement.setAttribute('tabindex', '0');
+        removeElement.setAttribute('aria-label', `${App.i18n.get('Remove')} ${label}`);
+
+        const remove = () => {
             this.removeTag(value);
             tagElement.remove();
+        };
+
+        removeElement.addEventListener('click', remove);
+        removeElement.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                remove();
+            }
         });
+
+        tagElement.appendChild(textElement);
+        tagElement.appendChild(removeElement);
 
         this.tagList.appendChild(tagElement);
         this.tags.push(value);

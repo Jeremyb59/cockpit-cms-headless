@@ -26,7 +26,7 @@ export default {
                 output = App.utils.$interpolate(field.opts.display, { /* deprecated */ value, data:value});
             } catch(e) {}
 
-            return output;
+            return DOMPurify.sanitize(output);
         }
     },
 
@@ -39,11 +39,11 @@ export default {
 
     props: {
         modelValue: {
-            default: {}
+            default: () => ({})
         },
         fields: {
             type: Array,
-            default: []
+            default: () => []
         },
         mode: {
             type: String,

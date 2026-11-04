@@ -16,80 +16,100 @@ $this->bind('/', function() {
     return $this->invoke('App\\Controller\\Dashboard', 'index');
 });
 
+$resolveAdminSessionState = function() {
+
+    $user = $this->helper('auth')->getUser();
+    $status = $user ? true : false;
+    $start  = $this->helper('session')->read('app.session.start', 0);
+
+    // check for inactivity: 90min by default
+    if ($status && $start && ($start + $this->retrieve('session.lifetime', 5400) < time())) {
+        $this->helper('auth')->logout();
+        $status = false;
+        $user = null;
+    }
+
+    return [
+        'user' => $user,
+        'status' => $status,
+        'csrf' => $status ? $this->helper('csrf')->token('app.csrf') : null,
+    ];
+};
+
 // global event stream for long polling
-$this->bind('/app-event-stream', function() {
+$this->bind('/app-event-stream', function() use ($resolveAdminSessionState) {
 
     $now = time();
     $lastCheck = $this->helper('session')->read('app.eventstream.lastcheck', $now);
-
-    $user = $this->helper('auth')->getUser();
-
-    if (!$user) {
-        return $this->stop(404);
-    }
-
+    $session = $resolveAdminSessionState();
     $sessionId = md5(session_id());
 
     $this->helper('session')->write('app.eventstream.lastcheck', $now);
     $this->helper('session')->close();
 
-    // auto-cleanup unrelevant events
-    $this->helper('eventStream')->cleanup();
+    $events = [];
 
-    // get all events since last check
-    $events = $this->helper('eventStream')->getEvents($lastCheck);
+    if ($session['status'] && $session['user']) {
 
-    // filter events
-    $events = array_filter($events, function($event) use($user, $sessionId) {
+        // auto-cleanup unrelevant events
+        $this->helper('eventStream')->cleanup();
 
-        if (isset($event['options']['to'])) {
+        // get all events since last check
+        $events = $this->helper('eventStream')->getEvents($lastCheck);
 
-            if (is_array($event['options']['to']) && !in_array($user['_id'], $event['options']['to'])) {
-                return false;
-            } elseif ($event['options']['to'] != $user['_id']) {
-                return false;
+        // filter events
+        $events = array_filter($events, function($event) use($session, $sessionId) {
+
+            if (isset($event['options']['to'])) {
+
+                if (is_array($event['options']['to']) && !in_array($session['user']['_id'], $event['options']['to'])) {
+                    return false;
+                } elseif ($event['options']['to'] != $session['user']['_id']) {
+                    return false;
+                }
             }
-        }
 
-        if (isset($event['options']['sessionId'])) {
+            if (isset($event['options']['sessionId'])) {
 
-            if (is_array($event['options']['sessionId']) && !in_array($sessionId, $event['options']['sessionId'])) {
-                return false;
-            } elseif ($event['options']['sessionId'] != $sessionId) {
-                return false;
+                if (is_array($event['options']['sessionId']) && !in_array($sessionId, $event['options']['sessionId'])) {
+                    return false;
+                } elseif ($event['options']['sessionId'] != $sessionId) {
+                    return false;
+                }
             }
-        }
 
-        return true;
-    });
+            return true;
+        });
+    }
 
-    return $events;
+    return [
+        'status' => $session['status'],
+        'csrf' => $session['csrf'],
+        'events' => array_values($events),
+    ];
 });
 
 
 // check + validate session time
-$this->on('app.admin.request', function(Lime\Request $request) {
+$this->on('app.admin.request', function(Lime\Request $request) use ($resolveAdminSessionState) {
 
     $user = $this->helper('auth')->getUser();
 
     if (in_array($request->route, ['/check-session', '/app-event-stream'])) {
 
-        $status = $user ? true : false;
-        $start  = $this->helper('session')->read('app.session.start', 0);
+        if ($request->route == '/check-session') {
 
-        // check for inactivity: 90min by default
-        if ($status && $start && ($start + $this->retrieve('session.lifetime', 5400) < time())) {
-            $this->helper('auth')->logout();
-            $status = false;
+            $session = $resolveAdminSessionState();
+
+            $this->bind('/check-session', function() use($session) {
+
+                return [
+                    'status' => $session['status'],
+                    'csrf' => $session['csrf'],
+                ];
+
+            }, true);
         }
-
-        $this->bind('/check-session', function() use($status) {
-
-            $csrf = $status ? $this->helper('csrf')->token('app.csrf') : null;
-
-            return compact('status', 'csrf');
-
-        }, $request->route == '/check-session');
 
         return;
     }

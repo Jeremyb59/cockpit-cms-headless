@@ -63,6 +63,8 @@ class Collection {
      */
     public function insert(array &$document): mixed {
 
+        $result = null;
+
         if (isset($document[0])) {
 
             $this->database->connection->beginTransaction();
@@ -79,10 +81,16 @@ class Collection {
                 }
             }
             $this->database->connection->commit();
-            return \count($document);
+            $result = \count($document);
         } else {
-            return $this->_insert($document);
+            $result = $this->_insert($document);
         }
+
+        if ($result) {
+            $this->database->invalidateSortOptimizationCache($this->name);
+        }
+
+        return $result;
     }
     /**
      * Insert document
@@ -96,11 +104,7 @@ class Collection {
         $table = $this->getSanitizedCollectionName();
         $document['_id'] = isset($document['_id']) ? $document['_id'] : createMongoDbLikeId();
         
-        // Encode document with error handling
-        $json = \json_encode($document, JSON_UNESCAPED_UNICODE);
-        if ($json === false) {
-            throw new \RuntimeException('Failed to encode document: ' . \json_last_error_msg());
-        }
+        $json = $this->encodeDocument($document, 'Failed to encode document');
         $data = ['document' => $json];
 
         $fields = [];
@@ -188,11 +192,7 @@ class Collection {
                     $document = $this->applyUpdateOperators($_doc, $data, $merge);
                     $document['_id'] = $_doc['_id'];
 
-                    // Encode document with error handling
-                    $json = \json_encode($document, JSON_UNESCAPED_UNICODE);
-                    if ($json === false) {
-                        throw new \RuntimeException('Failed to encode document during update: ' . \json_last_error_msg());
-                    }
+                    $json = $this->encodeDocument($document, 'Failed to encode document during update');
                     
                     $sql = "UPDATE `{$sanitizedName}` SET document=".$conn->quote($json)." WHERE id=".(int)$doc['id'];
 
@@ -204,6 +204,10 @@ class Collection {
                 $conn->rollBack();
                 throw $e;
             }
+        }
+
+        if (\count($result) > 0) {
+            $this->database->invalidateSortOptimizationCache($this->name);
         }
 
         return \count($result);
@@ -371,6 +375,27 @@ class Collection {
     }
 
     /**
+     * Encode a document for SQLite storage.
+     */
+    protected function encodeDocument(array $document, string $errorPrefix): string {
+        $json = \json_encode($document, JSON_UNESCAPED_UNICODE);
+
+        if ($json !== false) {
+            return $json;
+        }
+
+        if (\json_last_error() === JSON_ERROR_RECURSION) {
+            $json = \json_encode($document, JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+
+            if ($json !== false) {
+                return $json;
+            }
+        }
+
+        throw new \RuntimeException($errorPrefix . ': ' . \json_last_error_msg());
+    }
+
+    /**
      * Remove documents
      *
      * @param  mixed $criteria
@@ -395,6 +420,10 @@ class Collection {
         $result = $this->database->connection->exec($sql);
 
         $this->database->unregisterCriteriaFunction($criteriaFnId);
+
+        if ($result) {
+            $this->database->invalidateSortOptimizationCache($this->name);
+        }
 
         return $result;
     }
@@ -621,7 +650,9 @@ class Collection {
             }
             
             $this->database->connection->exec("ALTER TABLE `{$sanitizedOldName}` RENAME TO `{$sanitizedNewName}`");
+            $this->database->invalidateSortOptimizationCache($this->name);
             $this->name = $newname;
+            $this->database->invalidateSortOptimizationCache($this->name);
 
             return true;
         }

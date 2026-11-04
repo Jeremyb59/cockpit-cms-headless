@@ -6,20 +6,32 @@ customElements.define('app-loader', class extends HTMLElement {
 
     constructor() {
         super();
+        this._screenReaderLabel = null;
     }
 
     connectedCallback() {
         this.render();
     }
 
-    attributeChangedCallback(oldvalue, newvalue) {
-        if (oldvalue != newvalue) this.render();
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (oldValue !== newValue) this.render();
     }
 
     render() {
 
         let template;
         let mode = this.getAttribute('mode');
+        let label = this.statusLabel();
+
+        if (!this.hasAttribute('role')) {
+            this.setAttribute('role', 'status');
+        }
+
+        if (!this.hasAttribute('aria-live')) {
+            this.setAttribute('aria-live', 'polite');
+        }
+
+        this.setAttribute('aria-busy', 'true');
 
         switch (mode) {
             case 'dots':
@@ -35,6 +47,15 @@ customElements.define('app-loader', class extends HTMLElement {
         }
 
         this.innerHTML = template;
+        this._screenReaderLabel = document.createElement('span');
+        this._screenReaderLabel.className = 'app-loader-sr';
+        this._screenReaderLabel.textContent = label;
+        this.appendChild(this._screenReaderLabel);
+    }
+
+    statusLabel() {
+        return this.getAttribute('label')
+            || (window.App && App.i18n ? App.i18n.get('Loading') : 'Loading');
     }
 });
 
@@ -46,6 +67,7 @@ customElements.define('app-loader-cover', class extends HTMLElement {
 
     constructor() {
         super();
+        this._screenReaderLabel = null;
     }
 
     connectedCallback() {
@@ -70,7 +92,27 @@ customElements.define('app-loader-cover', class extends HTMLElement {
 
         if (!this.labelElement) return;
 
-        this.labelElement.innerText = this.getAttribute('label') || '';
-        this.loaderElement.setAttribute('mode', this.getAttribute('mode'));
+        const label = this.getAttribute('label') || (window.App && App.i18n ? App.i18n.get('Loading') : 'Loading');
+        const visibleLabel = this.getAttribute('label') || '';
+        const mode = this.getAttribute('mode');
+
+        if (!this.hasAttribute('role')) {
+            this.setAttribute('role', 'status');
+        }
+
+        if (!this.hasAttribute('aria-live')) {
+            this.setAttribute('aria-live', 'polite');
+        }
+
+        this.setAttribute('aria-busy', 'true');
+
+        this.labelElement.innerText = visibleLabel;
+        this.loaderElement.setAttribute('label', label);
+
+        if (mode) {
+            this.loaderElement.setAttribute('mode', mode);
+        } else {
+            this.loaderElement.removeAttribute('mode');
+        }
     }
 });

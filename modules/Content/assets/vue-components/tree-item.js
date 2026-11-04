@@ -39,7 +39,7 @@ export default {
         },
 
         contents() {
-            return App.utils.$interpolate(this.meta.display || '', { data: this.item });
+            return DOMPurify.sanitize(App.utils.$interpolate(this.meta.display || '', { data: this.item }));
         },
 
         fields() {

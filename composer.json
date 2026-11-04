@@ -39,7 +39,7 @@
         "ksubileau/color-thief-php": "^2.0",
         "league/flysystem": "^3.0",
         "league/flysystem-aws-s3-v3": "^3.0",
-        "firebase/php-jwt": "^6.0",
+        "firebase/php-jwt": "^7.0",
         "mongodb/mongodb": "^2.0.0",
         "maennchen/zipstream-php": "^3.1.0",
         "colinodell/json5": "^2.2",

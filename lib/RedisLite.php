@@ -1447,11 +1447,11 @@ class RedisLite {
                 if ($res) {
                     $stmt->closeCursor();
                     $value = json_decode($res['keyval'], false, 512, JSON_BIGINT_AS_STRING);
-                    // Check for overflow
-                    if (is_string($value) || $value > PHP_INT_MAX || $value < PHP_INT_MIN) {
+                    // BIGINT values that don't fit in a PHP int come back as strings.
+                    if (!is_int($value)) {
                         throw new \RuntimeException("Integer overflow detected for key '{$key}'");
                     }
-                    return (int)$value;
+                    return $value;
                 }
             } catch (\PDOException) {
                 // Fall back to transaction method if atomic update fails
@@ -1489,9 +1489,10 @@ class RedisLite {
                     }
                 }
 
-                // Calculate new value with overflow check
+                // Calculate new value with overflow check.
+                // PHP silently promotes int overflow to float, so verify the result is still an int.
                 $newValue = $current + $by;
-                if ($newValue > PHP_INT_MAX || $newValue < PHP_INT_MIN) {
+                if (!is_int($newValue)) {
                     throw new \RuntimeException("Integer overflow detected for key '{$key}'");
                 }
 
@@ -1587,6 +1588,10 @@ class RedisLite {
                 }
 
                 $newValue = (float)$current + $by;
+
+                if (!is_finite($newValue)) {
+                    throw new \RuntimeException("Float overflow detected for key '{$key}'");
+                }
 
                 // Update or insert with TTL preservation
                 if ($expires_at !== null) {

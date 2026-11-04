@@ -1,3 +1,5 @@
+import { Engine as JSLiteEngine } from "../../vendor/jslite.esm.js";
+
 let formatSize = function(bytes) {
     if (bytes == 0) { return "0.00 B"; }
     let e = Math.floor(Math.log(bytes) / Math.log(1024));
@@ -69,10 +71,11 @@ let copyText = function(text, cb) {
     if (cb) cb();
 }
 
+let interpolateEngine = new JSLiteEngine();
+
 let interpolate = function(str, params) {
-    const names = Object.keys(params);
-    const vals = Object.values(params);
-    return new Function(...names, `return \`${str}\`;`)(...vals);
+    const source = `return \`${str}\`;`;
+    return interpolateEngine.run(interpolateEngine.compile(source), Object.assign({}, params));
 }
 
 let uuid = function() {

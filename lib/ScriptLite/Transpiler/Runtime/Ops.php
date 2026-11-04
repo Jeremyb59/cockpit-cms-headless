@@ -28,6 +28,37 @@ final class Ops
     }
 
     /**
+     * Values that ScriptLite is allowed to invoke from transpiled code.
+     *
+     * PHP considers strings like "system" and arrays like [ClassName, "method"]
+     * callable. Those are PHP internals, not ScriptLite functions, so never use
+     * is_callable() for sandboxed JS calls.
+     */
+    public static function isFunction(mixed $value): bool
+    {
+        return $value instanceof JSFunction || $value instanceof \Closure;
+    }
+
+    public static function assertFunction(mixed $value): mixed
+    {
+        if (!self::isFunction($value)) {
+            throw new \RuntimeException('TypeError: value is not a function');
+        }
+
+        return $value;
+    }
+
+    /**
+     * JS function call with an explicit callable allow-list.
+     *
+     * @param list<mixed> $args
+     */
+    public static function call(mixed $callee, array $args): mixed
+    {
+        return self::assertFunction($callee)(...$args);
+    }
+
+    /**
      * JS ToNumber: coerce any value to int|float.
      */
     public static function toNumber(mixed $v): int|float
@@ -339,6 +370,85 @@ final class Ops
     }
 
     /**
+     * JS property write with JS key coercion.
+     */
+    public static function setProp(mixed $target, mixed $key, mixed $value): mixed
+    {
+        return self::setNamedProp($target, self::toPropertyKey($key), $value);
+    }
+
+    /**
+     * Fast path for dot-property writes where the key is already a JS string.
+     */
+    public static function setNamedProp(mixed $target, string $key, mixed $value): mixed
+    {
+        if ($target instanceof JSObject) {
+            $target->properties[$key] = $value;
+            return $value;
+        }
+
+        if ($target instanceof JSFunction) {
+            $target->properties[$key] = $value;
+            return $value;
+        }
+
+        if (is_array($target)) {
+            $target[$key] = $value;
+            return $value;
+        }
+
+        if ($target instanceof \ArrayAccess) {
+            $target[$key] = $value;
+            return $value;
+        }
+
+        if (is_object($target)) {
+            $target->{$key} = $value;
+        }
+
+        return $value;
+    }
+
+    /**
+     * JS ++/-- on a computed property, evaluating the key once.
+     */
+    public static function updateProp(mixed &$target, mixed $key, bool $increment, bool $prefix): mixed
+    {
+        return self::updateNamedProp($target, self::toPropertyKey($key), $increment, $prefix);
+    }
+
+    /**
+     * JS ++/-- on a named property, evaluating the property name once.
+     */
+    public static function updateNamedProp(mixed &$target, string $key, bool $increment, bool $prefix): mixed
+    {
+        $old = match (true) {
+            $target instanceof JSObject => self::getObjectProperty($target, $key),
+            $target instanceof JSFunction => $target->properties[$key] ?? null,
+            is_array($target) => array_key_exists($key, $target) ? $target[$key] : null,
+            $target instanceof \ArrayAccess => $target->offsetExists($key) ? $target[$key] : null,
+            is_object($target) => isset($target->{$key}) ? $target->{$key} : null,
+            default => null,
+        };
+
+        $new = self::toNumber($old) + ($increment ? 1 : -1);
+
+        if ($target instanceof JSObject) {
+            $target->properties[$key] = $new;
+        } elseif ($target instanceof JSFunction) {
+            $target->properties[$key] = $new;
+        } elseif (is_array($target)) {
+            $target[$key] = $new;
+        } elseif ($target instanceof \ArrayAccess) {
+            $target[$key] = $new;
+        } elseif (is_object($target)) {
+            $target->{$key} = $new;
+        }
+
+        return $prefix ? $new : $old;
+    }
+
+    /**
      * Create a JS object literal with JS property-key coercion.
      *
      * @param list<array{0:mixed,1:mixed}> $entries
@@ -497,7 +607,7 @@ final class Ops
             return $fallback;
         }
 
-        if (is_callable($callee)) {
+        if ($callee instanceof \Closure) {
             $result = $callee(...$args);
             if (self::isObjectLike($result)) {
                 return $result;

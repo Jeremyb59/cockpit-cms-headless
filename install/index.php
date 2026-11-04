@@ -75,6 +75,15 @@ if (isset($_GET['space']) && $_GET['space']) {
     }
 }
 
+$showForm = false;
+$installed = false;
+$formValues = [
+    'user' => 'admin',
+    'name' => 'Admin',
+    'email' => '',
+    'password' => '',
+];
+
 if (!count($failed)) {
 
     if (!class_exists('Cockpit')) {
@@ -85,15 +94,10 @@ if (!count($failed)) {
         'app_space' => $APP_SPACE
     ]);
 
-    // check whether cockpit is already installed
     try {
 
         // check memory config
         @$app->memory->get('test');
-
-        if (ini_get('session.save_handler') == 'redis') {
-            $connection = @(new MemoryStorage\Client(ini_get('session.save_path')))->get('test');
-        }
 
         if ($app->dataStorage->getCollection('system/users')->count()) {
 
@@ -101,24 +105,65 @@ if (!count($failed)) {
             exit;
         }
 
-        $created = time();
-        $password = generateRandomCockpitPassword();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-        $user = [
-            'active' => true,
-            'user' => 'admin',
-            'name' => 'Admin',
-            'email' => 'admin@admin.com',
-            'password' => $app->hash($password),
-            'i18n' => 'en',
-            'role' => 'admin',
-            'theme' => 'auto',
-            '_modified' => $created,
-            '_created' => $created
-        ];
+            $formValues['user']  = trim((string)($_POST['user'] ?? 'admin'));
+            $formValues['name']  = trim((string)($_POST['name'] ?? 'Admin'));
+            $formValues['email'] = trim((string)($_POST['email'] ?? ''));
+            $formValues['password'] = (string)($_POST['password'] ?? '');
 
-        $app->dataStorage->save('system/users', $user);
-        $app->trigger('app.system.install');
+            $formErrors = [];
+
+            if (!preg_match('/^[A-Za-z0-9_.\-]{2,60}$/', $formValues['user'])) {
+                $formErrors[] = 'Username must be 2-60 characters (letters, digits, . _ -)';
+            }
+
+            if ($formValues['name'] === '' || mb_strlen($formValues['name']) > 120) {
+                $formErrors[] = 'Display name is required (max 120 characters)';
+            }
+
+            if (!filter_var($formValues['email'], FILTER_VALIDATE_EMAIL)) {
+                $formErrors[] = 'A valid email address is required';
+            }
+
+            if (strlen($formValues['password']) < 8) {
+                $formErrors[] = 'Password must be at least 8 characters';
+            }
+
+            if (count($formErrors)) {
+
+                $showForm = true;
+                $failed = $formErrors;
+
+            } else {
+
+                $created = time();
+
+                $user = [
+                    'active' => true,
+                    'user' => $formValues['user'],
+                    'name' => $formValues['name'],
+                    'email' => $formValues['email'],
+                    'password' => $app->hash($formValues['password']),
+                    'i18n' => 'en',
+                    'role' => 'admin',
+                    'theme' => 'auto',
+                    '_modified' => $created,
+                    '_created' => $created
+                ];
+
+                $app->dataStorage->save('system/users', $user);
+                $app->trigger('app.system.install');
+
+                $installed = true;
+            }
+
+        } else {
+
+            // first visit — pre-fill with a suggested strong password the user can keep or replace
+            $formValues['password'] = generateRandomCockpitPassword();
+            $showForm = true;
+        }
 
     } catch(Throwable $e) {
 
@@ -127,9 +172,13 @@ if (!count($failed)) {
         } else {
             $failed[] = $e->getMessage();
         }
+
+        $showForm = false;
     }
 
 }
+
+$formAction = '?'.($APP_SPACE ? "space={$APP_SPACE}" : '');
 
 ?><!doctype html>
 <html lang="en">
@@ -155,12 +204,12 @@ if (!count($failed)) {
 </head>
 <body class="kiss-flex kiss-flex-center kiss-flex-middle">
 
-    <bg-fluxanimation class="kiss-cover" colors="<?= (count($failed) ? '--kiss-color-danger' : '--kiss-color-primary') ?>"></bg-fluxanimation>
+    <bg-fluxanimation class="kiss-cover" colors="<?= ((count($failed) && !$showForm) ? '--kiss-color-danger' : '--kiss-color-primary') ?>"></bg-fluxanimation>
 
 
     <kiss-container class="kiss-position-relative install-container">
 
-        <kiss-card class="install-card kiss-padding-large animated <?=(count($failed) ? 'bounceInDown':'pulse')?>" theme="shadowed contrast">
+        <kiss-card class="install-card kiss-padding-large animated <?=((count($failed) && !$showForm) ? 'bounceInDown':'pulse')?>" theme="shadowed contrast">
 
             <div>
                 <div class="kiss-flex kiss-margin">
@@ -175,7 +224,7 @@ if (!count($failed)) {
 
                 <hr class="kiss-margin-large-bottom">
 
-                <?php if (count($failed)): ?>
+                <?php if (count($failed) && !$showForm): ?>
 
                     <h1 class="kiss-size-3">
                         <icon class="kiss-color-danger kiss-margin-small-right" size="larger">block</icon>
@@ -188,7 +237,7 @@ if (!count($failed)) {
 
                         <?php foreach ($failed as $info): ?>
                         <div class="kiss-text-monospace kiss-margin-small kiss-flex">
-                            <span>🔥</span><div class="kiss-flex-1 kiss-size-small kiss-margin-small-left"><?=$info?></div>
+                            <span>🔥</span><div class="kiss-flex-1 kiss-size-small kiss-margin-small-left"><?=htmlspecialchars($info, ENT_QUOTES, 'UTF-8')?></div>
                         </div>
                         <?php endforeach; ?>
 
@@ -202,6 +251,55 @@ if (!count($failed)) {
                         <a class="kiss-button kiss-width-1-1" href="?<?=implode('&', [time(), ($APP_SPACE ? "space={$APP_SPACE}" : "")])?>">Retry installation</a>
                     </div>
 
+                <?php elseif ($showForm): ?>
+
+                    <h1 class="kiss-size-3">
+                        <icon class="kiss-color-primary kiss-margin-small-right" size="larger">person_add</icon>
+                        Create admin account
+                    </h1>
+
+                    <div class="kiss-margin-bottom kiss-color-muted kiss-size-small">
+                        Set the credentials for your first admin user. You can change them later.
+                    </div>
+
+                    <?php if (count($failed)): ?>
+                    <kiss-card class="kiss-padding kiss-bgcolor-contrast kiss-flex kiss-flex-column kiss-margin">
+                        <?php foreach ($failed as $info): ?>
+                        <div class="kiss-text-monospace kiss-margin-small kiss-flex">
+                            <span>🔥</span><div class="kiss-flex-1 kiss-size-small kiss-margin-small-left"><?=htmlspecialchars($info, ENT_QUOTES, 'UTF-8')?></div>
+                        </div>
+                        <?php endforeach; ?>
+                    </kiss-card>
+                    <?php endif; ?>
+
+                    <form method="post" action="<?=htmlspecialchars($formAction, ENT_QUOTES, 'UTF-8')?>">
+
+                        <div class="kiss-margin">
+                            <label class="kiss-text-caption kiss-color-muted">Username</label>
+                            <input class="kiss-input kiss-width-1-1" type="text" name="user" value="<?=htmlspecialchars($formValues['user'], ENT_QUOTES, 'UTF-8')?>" autocomplete="off" required>
+                        </div>
+
+                        <div class="kiss-margin">
+                            <label class="kiss-text-caption kiss-color-muted">Display name</label>
+                            <input class="kiss-input kiss-width-1-1" type="text" name="name" value="<?=htmlspecialchars($formValues['name'], ENT_QUOTES, 'UTF-8')?>" autocomplete="off" required>
+                        </div>
+
+                        <div class="kiss-margin">
+                            <label class="kiss-text-caption kiss-color-muted">Email</label>
+                            <input class="kiss-input kiss-width-1-1" type="email" name="email" value="<?=htmlspecialchars($formValues['email'], ENT_QUOTES, 'UTF-8')?>" autocomplete="off" required autofocus>
+                        </div>
+
+                        <div class="kiss-margin">
+                            <label class="kiss-text-caption kiss-color-muted">Password <span class="kiss-color-muted">(min 8 characters)</span></label>
+                            <input class="kiss-input kiss-width-1-1 kiss-text-monospace" type="text" name="password" value="<?=htmlspecialchars($formValues['password'], ENT_QUOTES, 'UTF-8')?>" autocomplete="off" minlength="8" required>
+                        </div>
+
+                        <div class="kiss-margin-large">
+                            <button type="submit" class="kiss-button kiss-button-primary kiss-width-1-1">Install Cockpit</button>
+                        </div>
+
+                    </form>
+
                 <?php else: ?>
 
                     <h1 class="kiss-size-3">
@@ -211,19 +309,19 @@ if (!count($failed)) {
 
                     <div class="kiss-text-caption kiss-text-bold kiss-color-muted kiss-margin">Next step:</div>
 
-                    <div class="kiss-margin">Please login into Cockpit using the following credentials:</div>
+                    <div class="kiss-margin">Please login into Cockpit using the credentials you just set.</div>
 
                     <kiss-card class="kiss-text-monospace kiss-padding kiss-bgcolor-contrast kiss-flex kiss-flex-column kiss-margin">
-                        <div><icon class="kiss-color-muted kiss-margin-right" size="larger">person</icon>admin</div>
-                        <div><icon class="kiss-color-muted kiss-margin-right" size="larger">key</icon><?=$password?></div>
+                        <div><icon class="kiss-color-muted kiss-margin-right" size="larger">person</icon><?=htmlspecialchars($formValues['user'], ENT_QUOTES, 'UTF-8')?></div>
+                        <div><icon class="kiss-color-muted kiss-margin-right" size="larger">mail</icon><?=htmlspecialchars($formValues['email'], ENT_QUOTES, 'UTF-8')?></div>
                     </kiss-card>
 
                     <div class="kiss-margin-large-bottom kiss-color-muted">
-                        You can change the credentials after your initial login to prevent bad things from bad people.
+                        For security, remove or protect the <code>install/</code> directory now that setup is complete.
                     </div>
 
                     <div class="kiss-margin-large">
-                        <a class="kiss-button kiss-button-primary kiss-width-1-1" href="../<?=($APP_SPACE ? ":{$APP_SPACE}" : "")?>" class="uk-button uk-button-large uk-button-primary uk-button-outline uk-width-1-1">Login now</a>
+                        <a class="kiss-button kiss-button-primary kiss-width-1-1" href="../<?=($APP_SPACE ? ":{$APP_SPACE}" : "")?>">Login now</a>
                     </div>
 
                 <?php endif; ?>

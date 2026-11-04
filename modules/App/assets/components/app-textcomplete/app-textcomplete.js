@@ -1,5 +1,7 @@
 
 
+let textcompleteInstanceCount = 0;
+
 customElements.define('app-textcomplete', class extends HTMLElement {
 
     constructor() {
@@ -7,6 +9,19 @@ customElements.define('app-textcomplete', class extends HTMLElement {
         this.itemList = [];
         this.triggerChar = '@';
         this.isAutocompleteActive = false;
+        this._connected = false;
+        this._ignoreInputEvent = false;
+        this._listId = `app-textcomplete-list-${++textcompleteInstanceCount}`;
+        this._lastAutoAriaLabel = null;
+
+        this.autocompleteList = document.createElement('div');
+        this.autocompleteList.className = 'app-textcomplete-autocomplete-list';
+        this.autocompleteList.id = this._listId;
+        this.autocompleteList.setAttribute('role', 'listbox');
+
+        this._handleInput = e => this.handleInput(e);
+        this._handleKeyDown = e => this.handleKeyDown(e);
+        this._handleClickOutside = e => this.handleClickOutside(e);
     }
 
     static get observedAttributes() {
@@ -14,6 +29,11 @@ customElements.define('app-textcomplete', class extends HTMLElement {
     }
 
     connectedCallback() {
+
+        if (this._connected) {
+            return;
+        }
+
         this.input = this.querySelector('input, textarea');
 
         if (!this.input) {
@@ -23,15 +43,32 @@ customElements.define('app-textcomplete', class extends HTMLElement {
             this.appendChild(this.input);
         }
 
-        this.autocompleteList = document.createElement('div');
-        this.autocompleteList.className = 'app-textcomplete-autocomplete-list';
+        this.input.addEventListener('input', this._handleInput);
+        this.input.addEventListener('keydown', this._handleKeyDown);
+        document.addEventListener('click', this._handleClickOutside);
 
-        this.input.addEventListener('input', this.handleInput.bind(this));
-        this.input.addEventListener('keydown', this.handleKeyDown.bind(this));
-        document.addEventListener('click', this.handleClickOutside.bind(this));
-
+        this.setupInputAccessibility();
         this.updateItems();
         this.updateTrigger();
+        this._connected = true;
+    }
+
+    disconnectedCallback() {
+
+        if (!this._connected) {
+            return;
+        }
+
+        this.hideItems();
+
+        if (this.input) {
+            this.input.removeEventListener('input', this._handleInput);
+            this.input.removeEventListener('keydown', this._handleKeyDown);
+        }
+
+        document.removeEventListener('click', this._handleClickOutside);
+
+        this._connected = false;
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
@@ -52,7 +89,36 @@ customElements.define('app-textcomplete', class extends HTMLElement {
         this.triggerChar = triggerAttr ? triggerAttr : '@';
     }
 
+    setupInputAccessibility() {
+
+        if (!this.input.hasAttribute('role') && this.input.tagName !== 'TEXTAREA') {
+            this.input.setAttribute('role', 'combobox');
+        }
+
+        if (this.input.tagName === 'TEXTAREA' && !this.input.hasAttribute('aria-multiline')) {
+            this.input.setAttribute('aria-multiline', 'true');
+        }
+
+        const label = this.input.getAttribute('placeholder') || 'Text input';
+        const currentAriaLabel = this.input.getAttribute('aria-label');
+
+        if (!this.input.hasAttribute('aria-labelledby') && (!currentAriaLabel || currentAriaLabel === this._lastAutoAriaLabel)) {
+            this.input.setAttribute('aria-label', label);
+            this._lastAutoAriaLabel = label;
+        }
+
+        this.input.setAttribute('aria-autocomplete', 'list');
+        this.input.setAttribute('aria-haspopup', 'listbox');
+        this.input.setAttribute('aria-controls', this._listId);
+        this.input.setAttribute('aria-expanded', 'false');
+    }
+
     handleInput(e) {
+
+        if (this._ignoreInputEvent) {
+            return;
+        }
+
         const cursorPosition = e.target.selectionStart;
         const inputValue = e.target.value;
         const lastTriggerIndex = inputValue.lastIndexOf(this.triggerChar, cursorPosition);
@@ -80,7 +146,9 @@ customElements.define('app-textcomplete', class extends HTMLElement {
         }
 
         // Append autocomplete list to body
-        document.body.appendChild(this.autocompleteList);
+        if (!this.autocompleteList.parentNode) {
+            document.body.appendChild(this.autocompleteList);
+        }
 
         const rect = this.input.getBoundingClientRect();
 
@@ -90,10 +158,13 @@ customElements.define('app-textcomplete', class extends HTMLElement {
             width: `${rect.width}px`,
         });
 
-        items.forEach(item => {
+        items.forEach((item, index) => {
             const div = document.createElement('div');
             div.textContent = item;
             div.className = 'autocomplete-item';
+            div.id = `${this._listId}-option-${index}`;
+            div.setAttribute('role', 'option');
+            div.setAttribute('aria-selected', 'false');
             div.addEventListener('click', () => this.selectItem(item));
             this.autocompleteList.appendChild(div);
         });
@@ -101,12 +172,19 @@ customElements.define('app-textcomplete', class extends HTMLElement {
         this.autocompleteList.style.display = 'block';
         this.isAutocompleteActive = true;
         this.setAttribute('active', 'true');
+        this.input.setAttribute('aria-expanded', 'true');
+        this.input.removeAttribute('aria-activedescendant');
     }
 
     hideItems() {
         this.autocompleteList.style.display = 'none';
         this.isAutocompleteActive = false;
         this.setAttribute('active', '');
+
+        if (this.input) {
+            this.input.setAttribute('aria-expanded', 'false');
+            this.input.removeAttribute('aria-activedescendant');
+        }
 
         if (this.autocompleteList.parentNode) {
             this.autocompleteList.parentNode.removeChild(this.autocompleteList);
@@ -125,6 +203,7 @@ customElements.define('app-textcomplete', class extends HTMLElement {
         const newCursorPosition = lastTriggerIndex + item.length;
         this.input.setSelectionRange(newCursorPosition, newCursorPosition);
         this.hideItems();
+        this.notifyInputChanged();
 
         this.dispatchEvent(new CustomEvent('textcomplete-select', {
             bubbles: true,
@@ -151,6 +230,7 @@ customElements.define('app-textcomplete', class extends HTMLElement {
                 nextItem = e.key === 'ArrowDown' ? items[0] : items[items.length - 1];
             } else {
                 activeItem.classList.remove('active');
+                activeItem.setAttribute('aria-selected', 'false');
                 const currentIndex = Array.from(items).indexOf(activeItem);
                 const nextIndex = e.key === 'ArrowDown'
                     ? (currentIndex + 1) % items.length
@@ -159,6 +239,8 @@ customElements.define('app-textcomplete', class extends HTMLElement {
             }
 
             nextItem.classList.add('active');
+            nextItem.setAttribute('aria-selected', 'true');
+            this.input.setAttribute('aria-activedescendant', nextItem.id);
             nextItem.scrollIntoView({ block: 'nearest' });
         } else if (e.key === 'Enter') {
             const activeItem = this.autocompleteList.querySelector('.autocomplete-item.active');
@@ -168,11 +250,11 @@ customElements.define('app-textcomplete', class extends HTMLElement {
                 this.selectItem(activeItem.textContent);
             }
         } else if (e.key === ' ' || e.key === 'Escape') {
-            this.cancelAutocomplete();
+            this.cancelAutocomplete(e.key === 'Escape');
         }
     }
 
-    cancelAutocomplete() {
+    cancelAutocomplete(notify = true) {
         this.hideItems();
         // Remove any partial input after the trigger character
         const cursorPosition = this.input.selectionStart;
@@ -181,12 +263,25 @@ customElements.define('app-textcomplete', class extends HTMLElement {
         if (lastTriggerIndex !== -1) {
             this.input.value = inputValue.slice(0, lastTriggerIndex + 1);
             this.input.setSelectionRange(lastTriggerIndex + 1, lastTriggerIndex + 1);
+            if (notify) {
+                this.notifyInputChanged();
+            }
         }
     }
 
     handleClickOutside(e) {
         if (!this.contains(e.target)) {
             this.hideItems();
+        }
+    }
+
+    notifyInputChanged() {
+        this._ignoreInputEvent = true;
+
+        try {
+            this.input.dispatchEvent(new Event('input', { bubbles: true }));
+        } finally {
+            this._ignoreInputEvent = false;
         }
     }
 });

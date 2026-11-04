@@ -49,6 +49,11 @@ $this->module('assets')->extend([
 
             if (!$_asset) continue;
 
+            if (isset($asset['title'])) {
+                $title = \is_string($asset['title']) ? $asset['title'] : '';
+                $asset['title'] = \trim(\str_replace(['<', '>', '"'], '', \strip_tags($title)));
+            }
+
             $asset['_modified'] = time();
             $asset['_mby'] = $by;
 
@@ -97,16 +102,16 @@ $this->module('assets')->extend([
 
             for ($i = 0; $i < $cnt; $i++) {
 
-                $_file  = $this->app->path('#tmp:').'/'.$files['name'][$i];
+                $_clientName = basename(str_replace('\\', '/', $files['name'][$i]));
+                $_filename = pathinfo($_clientName, PATHINFO_FILENAME);
+                $extension = pathinfo($_clientName, PATHINFO_EXTENSION);
+                $extension = preg_match('/^[a-z0-9]+$/i', $extension) ? strtolower($extension) : '';
+                $_filename = $this->app->helper('utils')->slugify($_filename, '-', false);
+                $_filename = $_filename ?: 'upload';
+                $_file  = $this->app->path('#tmp:').'/'.$_filename.($extension ? ".{$extension}" : '');
                 $_mime = $finfo->file($files['tmp_name'][$i]);
-                $_isAllowed = $allowed === true ? true : preg_match("/\.({$allowed})$/i", $_file);
+                $_isAllowed = $extension && ($allowed === true ? true : preg_match("/\.({$allowed})$/i", $_file));
                 $_sizeAllowed = $max_size ? filesize($files['tmp_name'][$i]) < $max_size : true;
-
-                $extension = strtolower(pathinfo(parse_url($_file, PHP_URL_PATH), PATHINFO_EXTENSION));
-
-                if (!$extension) {
-                    $_isAllowed = false;
-                }
 
                 // prevent uploading php / html files
                 if ($_isAllowed && (
@@ -118,12 +123,14 @@ $this->module('assets')->extend([
 
                 if (!$files['error'][$i] && $_isAllowed && $_sizeAllowed && ($isUpload ? move_uploaded_file($files['tmp_name'][$i], $_file) : rename($files['tmp_name'][$i], $_file))) {
 
+                    if (\preg_match('/\.svg$/i', $_file) && !\SVGSanitizer::sanitizeFile($_file)) {
+                        @unlink($_file);
+                        $failed[] = $files['name'][$i];
+                        continue;
+                    }
+
                     $_files[]   = $_file;
                     $uploaded[] = $files['name'][$i];
-
-                    if (\preg_match('/\.(svg|xml)$/i', $_file)) {
-                        file_put_contents($_file, \SVGSanitizer::clean(\file_get_contents($_file)));
-                    }
 
                 } else {
                     $failed[] = $files['name'][$i];
@@ -159,7 +166,7 @@ $this->module('assets')->extend([
             // clean filename
             $filename = pathinfo($file, PATHINFO_FILENAME);
             $ext = pathinfo($file, PATHINFO_EXTENSION);
-            $cleanFilename = $this->app->helper('utils')->sluggify($filename);
+            $cleanFilename = $this->app->helper('utils')->slugify($filename);
             $clean = $cleanFilename.uniqid("_uid_").'.'.$ext;
             $path  = '/'.date('Y/m/d').'/'.$clean;
 

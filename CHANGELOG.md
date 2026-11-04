@@ -1,5 +1,38 @@
 # Release Notes
 
+## 2.14.1 (2026-08-26)
+
+- Refactor session state management and event stream handling in admin module
+- Replace `App.utils.$interpolate` / `App.utils.interpolate` `Function`-based evaluation with sandboxed JSLite execution to reduce browser-side code execution risk while preserving display template behavior
+- Sanitize Set field and tree display template output to prevent stored XSS while preserving safe HTML formatting
+- Sanitize asset titles on save and escape asset metadata when rendering Asset fields to prevent stored XSS
+- Add manual admin account input on installation
+- MongoLite: Refactor document encoding in Collection class to improve error handling
+- Prevent users to update their active status without needed permissios
+- Breaking: JWT HS256 signing now requires keys to be at least 32 bytes long; update short `sec-key` before upgrading
+- Fix Set field options retaining fields from the previously created Set field
+- Fix path traversal in PHP built-in server space storage file handler @geo-chen
+- Harden bucket upload and rename filtering to block executable/HTML file types and PHP/HTML MIME types
+- Add dummy password check to prevent timing attacks in login method
+- Refactor URL construction in cron.php for better readability and security
+- Enhance argument normalization and validation un Ffmpeg/Vips helpers
+- Fix state validation for unpublished singleton items
+  
+## 2.14.0 (2026-03-30)
+
+- Improve KISS components
+- MongoLite: Restrict query callbacks (`$func`, `$fn`, `$f`, `$where`, direct criteria callbacks) to anonymous closures only
+- Improve logging utility: validate log type and enhance context handling
+- Add support for custom ACL permission expression (via ScriptLite)
+- Content: Add `meta.computed` ScriptLite support for save-time computed fields
+- Fix Bucket path traversal vulnerability
+- Enhance SVG file handling during uploads
+- Improve Thumbhash class with enhanced validation and error handling
+- MongoLite: Optimize sorting performance
+- Content: Validate and enforce ACL permissions on `$lookup` stages in aggregate pipeline
+- Harden session cookie handling: enforce `HttpOnly`, auto-detect `Secure`, validate `SameSite`, and support configurable cookie params via `session.cookie`
+- Sanitize display values in `field-select` and `field-tags` components to prevent XSS
+
 ## 2.13.5 (2026-03-09)
 
 - Add support for PHP 8.5+ compatible custom SQLite functions (IndexLite lib)

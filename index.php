@@ -43,12 +43,20 @@ if (PHP_SAPI == 'cli-server') {
     }
 
     // handle static space storage files
-    if (str_starts_with($_SERVER['PATH_INFO'], '/:') && str_contains($_SERVER['PATH_INFO'], '/storage/')) {
+    if (preg_match('#^/:([^/]+)/storage/(.+)$#', $_SERVER['PATH_INFO'], $matches)) {
 
         $spaceFilePath = APP_SPACES_DIR.'/'.trim(substr($_SERVER['PATH_INFO'], 2), '/');
-        $path  = pathinfo($spaceFilePath);
+        $storagePath = realpath(APP_SPACES_DIR."/{$matches[1]}/storage");
+        $spaceFilePath = realpath($spaceFilePath);
 
-        if (is_file($spaceFilePath)) {
+        if (
+            $storagePath &&
+            $spaceFilePath &&
+            str_starts_with($spaceFilePath, $storagePath.DIRECTORY_SEPARATOR) &&
+            is_file($spaceFilePath)
+        ) {
+
+            $path = pathinfo($spaceFilePath);
 
             if ($path['extension'] === 'php') {
                 include($spaceFilePath);

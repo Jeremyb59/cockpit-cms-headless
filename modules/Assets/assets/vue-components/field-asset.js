@@ -31,21 +31,25 @@ export default {
                 return value.length;
             }
 
+            const title = App.utils.escape(value.title);
+            const mime = App.utils.escape(value.mime);
+            const details = `${title} - ${mime}`;
+
             if (context === 'table-cell') {
 
                 if (value.type === 'image') {
 
                     const src = App.route(`/assets/thumbnail/${value._id}?m=bestFit&mime=auto&h=20&t=${value._modified}`);
 
-                    return `<img loading="lazy" class="kiss-responsive-height" src="${src}" style="height:20px" title="${value.title} - ${value.mime}">`;
+                    return `<img loading="lazy" class="kiss-responsive-height" src="${src}" style="height:20px" title="${details}">`;
                 }
 
                 return `
-                    <div class="kiss-flex kiss-flex-middle" gap="xsmall" title="${value.title} - ${value.mime}">
+                    <div class="kiss-flex kiss-flex-middle" gap="xsmall" title="${details}">
                         <div><kiss-svg width="35" height="35" src="${App.base(value.type === 'video' ? 'assets:assets/icons/video.svg' : 'assets:assets/icons/file.svg')}"><canvas width="35" height="35"></canvas></kiss-svg></div>
                         <div class="flex-item-1 kiss-size-xsmall">
-                            <div>${App.utils.truncate(value.title || 'n/a', 30)}</div>
-                            <div class="kiss-color-muted">${value.mime}</div>
+                            <div>${App.utils.truncate(App.utils.escape(value.title || 'n/a'), 30)}</div>
+                            <div class="kiss-color-muted">${mime}</div>
                         </div>
                     </div>
                 `;
@@ -59,7 +63,7 @@ export default {
 
                 const src = App.route(`/assets/thumbnail/${value._id}?m=bestFit&mime=auto&h=${(mediaSize * 2)}&t=${value._modified}`);
 
-                media = `<img loading="lazy" class="kiss-responsive-height kiss-margin-auto" src="${src}" title="${value.title} - ${value.mime}" style="height:${mediaSize}px;object-fit:contain;object-position:center;">`;
+                media = `<img loading="lazy" class="kiss-responsive-height kiss-margin-auto" src="${src}" title="${details}" style="height:${mediaSize}px;object-fit:contain;object-position:center;">`;
             }
 
             return /*html*/ `
@@ -69,7 +73,7 @@ export default {
                         <div class="kiss-cover ${ value.type === 'image' ? 'kiss-bgcolor-transparentimage' : '' }" style="--kiss-bgcolor-transparentimage-size:10px">${media}</div>
                     </div>
                     <div class="kiss-flex-1 kiss-size-xsmall">
-                        <div class="kiss-text-truncate" title="${value.title}">${value.title}</div>
+                        <div class="kiss-text-truncate" title="${title}">${title}</div>
                         <div class="kiss-color-muted">${App.utils.formatSize(value.size) }</div>
                     </div>
                 </kiss-row>

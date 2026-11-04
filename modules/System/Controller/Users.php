@@ -92,9 +92,9 @@ class Users extends App {
             return $this->stop(['error' => 'User verification failed'], 412);
         }
 
-        // don't allow to change role if not allowed
-        if (isset($user['role']) && !$this->isAllowed('app/users/manage')) {
-            unset($user['role']);
+        // don't allow to change sensitive fields if user doesn't have permissions
+        if (!$this->isAllowed('app/users/manage')) {
+            unset($user['role'], $user['active']);
         }
 
         $user['_modified'] = \time();

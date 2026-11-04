@@ -8,6 +8,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -18,7 +19,6 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         '8a9dc1de0ca7e01f3e08231539562f61' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/functions.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '606a39d89246991a373564698c2d8383' => __DIR__ . '/..' . '/symfony/polyfill-php85/bootstrap.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         '7aed44d824e149ce152c0fb82af9379a' => __DIR__ . '/..' . '/colinodell/json5/src/global.php',
@@ -27,15 +27,15 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
     );
 
     public static $prefixLengthsPsr4 = array (
-        'p' => 
+        'p' =>
         array (
             'phpseclib3\\' => 11,
         ),
-        'Z' => 
+        'Z' =>
         array (
             'ZipStream\\' => 10,
         ),
-        'S' => 
+        'S' =>
         array (
             'Symfony\\Polyfill\\Php85\\' => 23,
             'Symfony\\Polyfill\\Php84\\' => 23,
@@ -53,11 +53,11 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
             'Symfony\\Component\\Filesystem\\' => 29,
             'Symfony\\Component\\Console\\' => 26,
         ),
-        'R' => 
+        'R' =>
         array (
             'RobThree\\Auth\\' => 14,
         ),
-        'P' => 
+        'P' =>
         array (
             'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
@@ -68,15 +68,15 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
             'PHPStan\\PhpDocParser\\' => 21,
             'PHPMailer\\PHPMailer\\' => 20,
         ),
-        'O' => 
+        'O' =>
         array (
             'OpenApi\\' => 8,
         ),
-        'M' => 
+        'M' =>
         array (
             'MongoDB\\' => 8,
         ),
-        'L' => 
+        'L' =>
         array (
             'League\\MimeTypeDetection\\' => 25,
             'League\\Flysystem\\Local\\' => 23,
@@ -84,224 +84,224 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
             'League\\Flysystem\\' => 17,
             'League\\ColorExtractor\\' => 22,
         ),
-        'J' => 
+        'J' =>
         array (
             'JmesPath\\' => 9,
         ),
-        'G' => 
+        'G' =>
         array (
             'GuzzleHttp\\Psr7\\' => 16,
             'GuzzleHttp\\Promise\\' => 19,
             'GuzzleHttp\\' => 11,
             'GraphQL\\' => 8,
         ),
-        'F' => 
+        'F' =>
         array (
             'Firebase\\JWT\\' => 13,
         ),
-        'D' => 
+        'D' =>
         array (
             'DASPRiD\\Enum\\' => 13,
         ),
-        'C' => 
+        'C' =>
         array (
             'ColorThief\\' => 11,
             'ColinODell\\Json5\\' => 17,
         ),
-        'B' => 
+        'B' =>
         array (
             'BaconQrCode\\' => 12,
         ),
-        'A' => 
+        'A' =>
         array (
             'Aws\\' => 4,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'phpseclib3\\' => 
+        'phpseclib3\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
         ),
-        'ZipStream\\' => 
+        'ZipStream\\' =>
         array (
             0 => __DIR__ . '/..' . '/maennchen/zipstream-php/src',
         ),
-        'Symfony\\Polyfill\\Php85\\' => 
+        'Symfony\\Polyfill\\Php85\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php85',
         ),
-        'Symfony\\Polyfill\\Php84\\' => 
+        'Symfony\\Polyfill\\Php84\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php84',
         ),
-        'Symfony\\Polyfill\\Php80\\' => 
+        'Symfony\\Polyfill\\Php80\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
-        'Symfony\\Polyfill\\Php73\\' => 
+        'Symfony\\Polyfill\\Php73\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php73',
         ),
-        'Symfony\\Polyfill\\Mbstring\\' => 
+        'Symfony\\Polyfill\\Mbstring\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-mbstring',
         ),
-        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
+        'Symfony\\Polyfill\\Intl\\Normalizer\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
         ),
-        'Symfony\\Polyfill\\Intl\\Grapheme\\' => 
+        'Symfony\\Polyfill\\Intl\\Grapheme\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme',
         ),
-        'Symfony\\Polyfill\\Ctype\\' => 
+        'Symfony\\Polyfill\\Ctype\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-ctype',
         ),
-        'Symfony\\Contracts\\Service\\' => 
+        'Symfony\\Contracts\\Service\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/service-contracts',
         ),
-        'Symfony\\Component\\Yaml\\' => 
+        'Symfony\\Component\\Yaml\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/yaml',
         ),
-        'Symfony\\Component\\String\\' => 
+        'Symfony\\Component\\String\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/string',
         ),
-        'Symfony\\Component\\Process\\' => 
+        'Symfony\\Component\\Process\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/process',
         ),
-        'Symfony\\Component\\Finder\\' => 
+        'Symfony\\Component\\Finder\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/finder',
         ),
-        'Symfony\\Component\\Filesystem\\' => 
+        'Symfony\\Component\\Filesystem\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/filesystem',
         ),
-        'Symfony\\Component\\Console\\' => 
+        'Symfony\\Component\\Console\\' =>
         array (
             0 => __DIR__ . '/..' . '/symfony/console',
         ),
-        'RobThree\\Auth\\' => 
+        'RobThree\\Auth\\' =>
         array (
             0 => __DIR__ . '/..' . '/robthree/twofactorauth/lib',
         ),
-        'Psr\\Log\\' => 
+        'Psr\\Log\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/log/src',
         ),
-        'Psr\\Http\\Message\\' => 
+        'Psr\\Http\\Message\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-factory/src',
             1 => __DIR__ . '/..' . '/psr/http-message/src',
         ),
-        'Psr\\Http\\Client\\' => 
+        'Psr\\Http\\Client\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/http-client/src',
         ),
-        'Psr\\Container\\' => 
+        'Psr\\Container\\' =>
         array (
             0 => __DIR__ . '/..' . '/psr/container/src',
         ),
-        'PhpParser\\' => 
+        'PhpParser\\' =>
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
         ),
-        'ParagonIE\\ConstantTime\\' => 
+        'ParagonIE\\ConstantTime\\' =>
         array (
             0 => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src',
         ),
-        'PHPStan\\PhpDocParser\\' => 
+        'PHPStan\\PhpDocParser\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src',
         ),
-        'PHPMailer\\PHPMailer\\' => 
+        'PHPMailer\\PHPMailer\\' =>
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
-        'OpenApi\\' => 
+        'OpenApi\\' =>
         array (
             0 => __DIR__ . '/..' . '/zircote/swagger-php/src',
         ),
-        'MongoDB\\' => 
+        'MongoDB\\' =>
         array (
             0 => __DIR__ . '/..' . '/mongodb/mongodb/src',
         ),
-        'League\\MimeTypeDetection\\' => 
+        'League\\MimeTypeDetection\\' =>
         array (
             0 => __DIR__ . '/..' . '/league/mime-type-detection/src',
         ),
-        'League\\Flysystem\\Local\\' => 
+        'League\\Flysystem\\Local\\' =>
         array (
             0 => __DIR__ . '/..' . '/league/flysystem-local',
         ),
-        'League\\Flysystem\\AwsS3V3\\' => 
+        'League\\Flysystem\\AwsS3V3\\' =>
         array (
             0 => __DIR__ . '/..' . '/league/flysystem-aws-s3-v3',
         ),
-        'League\\Flysystem\\' => 
+        'League\\Flysystem\\' =>
         array (
             0 => __DIR__ . '/..' . '/league/flysystem/src',
         ),
-        'League\\ColorExtractor\\' => 
+        'League\\ColorExtractor\\' =>
         array (
             0 => __DIR__ . '/..' . '/league/color-extractor/src',
         ),
-        'JmesPath\\' => 
+        'JmesPath\\' =>
         array (
             0 => __DIR__ . '/..' . '/mtdowling/jmespath.php/src',
         ),
-        'GuzzleHttp\\Psr7\\' => 
+        'GuzzleHttp\\Psr7\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
         ),
-        'GuzzleHttp\\Promise\\' => 
+        'GuzzleHttp\\Promise\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
         ),
-        'GuzzleHttp\\' => 
+        'GuzzleHttp\\' =>
         array (
             0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
         ),
-        'GraphQL\\' => 
+        'GraphQL\\' =>
         array (
             0 => __DIR__ . '/..' . '/webonyx/graphql-php/src',
         ),
-        'Firebase\\JWT\\' => 
+        'Firebase\\JWT\\' =>
         array (
             0 => __DIR__ . '/..' . '/firebase/php-jwt/src',
         ),
-        'DASPRiD\\Enum\\' => 
+        'DASPRiD\\Enum\\' =>
         array (
             0 => __DIR__ . '/..' . '/dasprid/enum/src',
         ),
-        'ColorThief\\' => 
+        'ColorThief\\' =>
         array (
             0 => __DIR__ . '/..' . '/ksubileau/color-thief-php/src/ColorThief',
         ),
-        'ColinODell\\Json5\\' => 
+        'ColinODell\\Json5\\' =>
         array (
             0 => __DIR__ . '/..' . '/colinodell/json5/src',
         ),
-        'BaconQrCode\\' => 
+        'BaconQrCode\\' =>
         array (
             0 => __DIR__ . '/..' . '/bacon/bacon-qr-code/src',
         ),
-        'Aws\\' => 
+        'Aws\\' =>
         array (
             0 => __DIR__ . '/..' . '/aws/aws-sdk-php/src',
         ),
     );
 
     public static $prefixesPsr0 = array (
-        'c' => 
+        'c' =>
         array (
-            'claviska' => 
+            'claviska' =>
             array (
                 0 => __DIR__ . '/..' . '/claviska/simpleimage/src',
             ),
@@ -480,6 +480,10 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Aws\\EndpointDiscovery\\EndpointList' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointDiscovery/EndpointList.php',
         'Aws\\EndpointDiscovery\\Exception\\ConfigurationException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointDiscovery/Exception/ConfigurationException.php',
         'Aws\\EndpointParameterMiddleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointParameterMiddleware.php',
+        'Aws\\EndpointV2\\Bdd\\BddEvaluator' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointV2/Bdd/BddEvaluator.php',
+        'Aws\\EndpointV2\\Bdd\\BddNodeDecoder' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointV2/Bdd/BddNodeDecoder.php',
+        'Aws\\EndpointV2\\Bdd\\BddResultResolver' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointV2/Bdd/BddResultResolver.php',
+        'Aws\\EndpointV2\\Bdd\\BddRuleset' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointV2/Bdd/BddRuleset.php',
         'Aws\\EndpointV2\\EndpointDefinitionProvider' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointV2/EndpointDefinitionProvider.php',
         'Aws\\EndpointV2\\EndpointProviderV2' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointV2/EndpointProviderV2.php',
         'Aws\\EndpointV2\\EndpointV2Middleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/EndpointV2/EndpointV2Middleware.php',
@@ -523,6 +527,8 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Aws\\Exception\\UnresolvedSignatureException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Exception/UnresolvedSignatureException.php',
         'Aws\\HandlerList' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/HandlerList.php',
         'Aws\\Handler\\Guzzle\\GuzzleHandler' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Handler/Guzzle/GuzzleHandler.php',
+        'Aws\\Handler\\HttpHandlerError' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Handler/HttpHandlerError.php',
+        'Aws\\Handler\\HttpTransportSharing' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Handler/HttpTransportSharing.php',
         'Aws\\HasDataTrait' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/HasDataTrait.php',
         'Aws\\HasMonitoringEventsTrait' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/HasMonitoringEventsTrait.php',
         'Aws\\HashInterface' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/HashInterface.php',
@@ -566,6 +572,10 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Aws\\Retry\\QuotaManager' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Retry/QuotaManager.php',
         'Aws\\Retry\\RateLimiter' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Retry/RateLimiter.php',
         'Aws\\Retry\\RetryHelperTrait' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Retry/RetryHelperTrait.php',
+        'Aws\\Retry\\V3\\LongPolling' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Retry/V3/LongPolling.php',
+        'Aws\\Retry\\V3\\OptIn' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Retry/V3/OptIn.php',
+        'Aws\\Retry\\V3\\QuotaManager' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Retry/V3/QuotaManager.php',
+        'Aws\\Retry\\V3\\RetryMiddleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/Retry/V3/RetryMiddleware.php',
         'Aws\\S3\\AmbiguousSuccessParser' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/AmbiguousSuccessParser.php',
         'Aws\\S3\\ApplyChecksumMiddleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/ApplyChecksumMiddleware.php',
         'Aws\\S3\\BatchDelete' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/BatchDelete.php',
@@ -586,6 +596,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Aws\\S3\\Crypto\\UserAgentTrait' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/Crypto/UserAgentTrait.php',
         'Aws\\S3\\EndpointRegionHelperTrait' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/EndpointRegionHelperTrait.php',
         'Aws\\S3\\Exception\\DeleteMultipleObjectsException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/Exception/DeleteMultipleObjectsException.php',
+        'Aws\\S3\\Exception\\MultipartCopyAnnotationException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/Exception/MultipartCopyAnnotationException.php',
         'Aws\\S3\\Exception\\PermanentRedirectException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/Exception/PermanentRedirectException.php',
         'Aws\\S3\\Exception\\S3Exception' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/Exception/S3Exception.php',
         'Aws\\S3\\Exception\\S3MultipartUploadException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/Exception/S3MultipartUploadException.php',
@@ -616,15 +627,22 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Aws\\S3\\S3MultiRegionClient' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3MultiRegionClient.php',
         'Aws\\S3\\S3Transfer\\AbstractMultipartDownloader' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/AbstractMultipartDownloader.php',
         'Aws\\S3\\S3Transfer\\AbstractMultipartUploader' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/AbstractMultipartUploader.php',
+        'Aws\\S3\\S3Transfer\\DirectoryDownloader' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/DirectoryDownloader.php',
+        'Aws\\S3\\S3Transfer\\DirectoryUploader' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/DirectoryUploader.php',
         'Aws\\S3\\S3Transfer\\Exception\\FileDownloadException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Exception/FileDownloadException.php',
         'Aws\\S3\\S3Transfer\\Exception\\ProgressTrackerException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Exception/ProgressTrackerException.php',
         'Aws\\S3\\S3Transfer\\Exception\\S3TransferException' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Exception/S3TransferException.php',
+        'Aws\\S3\\S3Transfer\\Models\\AbstractResumableTransfer' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/AbstractResumableTransfer.php',
         'Aws\\S3\\S3Transfer\\Models\\AbstractTransferRequest' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/AbstractTransferRequest.php',
         'Aws\\S3\\S3Transfer\\Models\\DownloadDirectoryRequest' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/DownloadDirectoryRequest.php',
         'Aws\\S3\\S3Transfer\\Models\\DownloadDirectoryResult' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/DownloadDirectoryResult.php',
         'Aws\\S3\\S3Transfer\\Models\\DownloadFileRequest' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/DownloadFileRequest.php',
         'Aws\\S3\\S3Transfer\\Models\\DownloadRequest' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/DownloadRequest.php',
         'Aws\\S3\\S3Transfer\\Models\\DownloadResult' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/DownloadResult.php',
+        'Aws\\S3\\S3Transfer\\Models\\ResumableDownload' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/ResumableDownload.php',
+        'Aws\\S3\\S3Transfer\\Models\\ResumableUpload' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/ResumableUpload.php',
+        'Aws\\S3\\S3Transfer\\Models\\ResumeDownloadRequest' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/ResumeDownloadRequest.php',
+        'Aws\\S3\\S3Transfer\\Models\\ResumeUploadRequest' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/ResumeUploadRequest.php',
         'Aws\\S3\\S3Transfer\\Models\\S3TransferManagerConfig' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/S3TransferManagerConfig.php',
         'Aws\\S3\\S3Transfer\\Models\\UploadDirectoryRequest' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/UploadDirectoryRequest.php',
         'Aws\\S3\\S3Transfer\\Models\\UploadDirectoryResult' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Models/UploadDirectoryResult.php',
@@ -636,6 +654,9 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Aws\\S3\\S3Transfer\\Progress\\AbstractTransferListener' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/AbstractTransferListener.php',
         'Aws\\S3\\S3Transfer\\Progress\\ColoredTransferProgressBarFormat' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/ColoredTransferProgressBarFormat.php',
         'Aws\\S3\\S3Transfer\\Progress\\ConsoleProgressBar' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/ConsoleProgressBar.php',
+        'Aws\\S3\\S3Transfer\\Progress\\DirectoryProgressTracker' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/DirectoryProgressTracker.php',
+        'Aws\\S3\\S3Transfer\\Progress\\DirectoryTransferProgressAggregator' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/DirectoryTransferProgressAggregator.php',
+        'Aws\\S3\\S3Transfer\\Progress\\DirectoryTransferProgressSnapshot' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/DirectoryTransferProgressSnapshot.php',
         'Aws\\S3\\S3Transfer\\Progress\\MultiProgressBarFormat' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/MultiProgressBarFormat.php',
         'Aws\\S3\\S3Transfer\\Progress\\MultiProgressTracker' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/MultiProgressTracker.php',
         'Aws\\S3\\S3Transfer\\Progress\\PlainProgressBarFormat' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Progress/PlainProgressBarFormat.php',
@@ -650,6 +671,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Aws\\S3\\S3Transfer\\S3TransferManager' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/S3TransferManager.php',
         'Aws\\S3\\S3Transfer\\Utils\\AbstractDownloadHandler' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Utils/AbstractDownloadHandler.php',
         'Aws\\S3\\S3Transfer\\Utils\\FileDownloadHandler' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Utils/FileDownloadHandler.php',
+        'Aws\\S3\\S3Transfer\\Utils\\ResumableDownloadHandlerInterface' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Utils/ResumableDownloadHandlerInterface.php',
         'Aws\\S3\\S3Transfer\\Utils\\StreamDownloadHandler' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3Transfer/Utils/StreamDownloadHandler.php',
         'Aws\\S3\\S3UriParser' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/S3UriParser.php',
         'Aws\\S3\\SSECMiddleware' => __DIR__ . '/..' . '/aws/aws-sdk-php/src/S3/SSECMiddleware.php',
@@ -794,10 +816,13 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'DASPRiD\\Enum\\Exception\\UnserializeNotSupportedException' => __DIR__ . '/..' . '/dasprid/enum/src/Exception/UnserializeNotSupportedException.php',
         'DASPRiD\\Enum\\NullValue' => __DIR__ . '/..' . '/dasprid/enum/src/NullValue.php',
         'DeepArrayIterator' => __DIR__ . '/../../..' . '/lib/DeepArrayIterator.php',
-        'Deprecated' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Deprecated.php',
+        'DelayedTargetValidation' => __DIR__ . '/..' . '/symfony/polyfill-php85/Resources/stubs/DelayedTargetValidation.php',
+        'Deprecated' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/Deprecated.php',
         'DotEnv' => __DIR__ . '/../../..' . '/lib/DotEnv.php',
         'ESQL\\Client' => __DIR__ . '/../../..' . '/lib/ESQL/Client.php',
         'FileStorage' => __DIR__ . '/../../..' . '/lib/FileStorage.php',
+        'Filter\\FilterException' => __DIR__ . '/..' . '/symfony/polyfill-php85/Resources/stubs/Filter/FilterException.php',
+        'Filter\\FilterFailedException' => __DIR__ . '/..' . '/symfony/polyfill-php85/Resources/stubs/Filter/FilterFailedException.php',
         'Firebase\\JWT\\BeforeValidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/BeforeValidException.php',
         'Firebase\\JWT\\CachedKeySet' => __DIR__ . '/..' . '/firebase/php-jwt/src/CachedKeySet.php',
         'Firebase\\JWT\\ExpiredException' => __DIR__ . '/..' . '/firebase/php-jwt/src/ExpiredException.php',
@@ -823,6 +848,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'GraphQL\\Executor\\Executor' => __DIR__ . '/..' . '/webonyx/graphql-php/src/Executor/Executor.php',
         'GraphQL\\Executor\\ExecutorImplementation' => __DIR__ . '/..' . '/webonyx/graphql-php/src/Executor/ExecutorImplementation.php',
         'GraphQL\\Executor\\PromiseExecutor' => __DIR__ . '/..' . '/webonyx/graphql-php/src/Executor/PromiseExecutor.php',
+        'GraphQL\\Executor\\Promise\\Adapter\\AmpFutureAdapter' => __DIR__ . '/..' . '/webonyx/graphql-php/src/Executor/Promise/Adapter/AmpFutureAdapter.php',
         'GraphQL\\Executor\\Promise\\Adapter\\AmpPromiseAdapter' => __DIR__ . '/..' . '/webonyx/graphql-php/src/Executor/Promise/Adapter/AmpPromiseAdapter.php',
         'GraphQL\\Executor\\Promise\\Adapter\\ReactPromiseAdapter' => __DIR__ . '/..' . '/webonyx/graphql-php/src/Executor/Promise/Adapter/ReactPromiseAdapter.php',
         'GraphQL\\Executor\\Promise\\Adapter\\SyncPromise' => __DIR__ . '/..' . '/webonyx/graphql-php/src/Executor/Promise/Adapter/SyncPromise.php',
@@ -1057,14 +1083,20 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'GuzzleHttp\\Handler\\CurlFactoryInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlFactoryInterface.php',
         'GuzzleHttp\\Handler\\CurlHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlHandler.php',
         'GuzzleHttp\\Handler\\CurlMultiHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlMultiHandler.php',
+        'GuzzleHttp\\Handler\\CurlShareHandleState' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlShareHandleState.php',
+        'GuzzleHttp\\Handler\\CurlVersion' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/CurlVersion.php',
         'GuzzleHttp\\Handler\\EasyHandle' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/EasyHandle.php',
         'GuzzleHttp\\Handler\\HeaderProcessor' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HeaderProcessor.php',
+        'GuzzleHttp\\Handler\\HostValidator' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/HostValidator.php',
         'GuzzleHttp\\Handler\\MockHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/MockHandler.php',
         'GuzzleHttp\\Handler\\Proxy' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/Proxy.php',
+        'GuzzleHttp\\Handler\\ProxyEnvironment' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/ProxyEnvironment.php',
         'GuzzleHttp\\Handler\\StreamHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/StreamHandler.php',
+        'GuzzleHttp\\Handler\\TlsVersion' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/TlsVersion.php',
         'GuzzleHttp\\MessageFormatter' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/MessageFormatter.php',
         'GuzzleHttp\\MessageFormatterInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/MessageFormatterInterface.php',
         'GuzzleHttp\\Middleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Middleware.php',
+        'GuzzleHttp\\Multiplexing' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Multiplexing.php',
         'GuzzleHttp\\Pool' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Pool.php',
         'GuzzleHttp\\PrepareBodyMiddleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/PrepareBodyMiddleware.php',
         'GuzzleHttp\\Promise\\AggregateException' => __DIR__ . '/..' . '/guzzlehttp/promises/src/AggregateException.php',
@@ -1103,6 +1135,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'GuzzleHttp\\Psr7\\Query' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Query.php',
         'GuzzleHttp\\Psr7\\Request' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Request.php',
         'GuzzleHttp\\Psr7\\Response' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Response.php',
+        'GuzzleHttp\\Psr7\\Rfc3986' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Rfc3986.php',
         'GuzzleHttp\\Psr7\\Rfc7230' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Rfc7230.php',
         'GuzzleHttp\\Psr7\\ServerRequest' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/ServerRequest.php',
         'GuzzleHttp\\Psr7\\Stream' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/Stream.php',
@@ -1118,6 +1151,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'GuzzleHttp\\RequestOptions' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/RequestOptions.php',
         'GuzzleHttp\\RetryMiddleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/RetryMiddleware.php',
         'GuzzleHttp\\TransferStats' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransferStats.php',
+        'GuzzleHttp\\TransportSharing' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransportSharing.php',
         'GuzzleHttp\\Utils' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Utils.php',
         'IndexHybrid\\Manager' => __DIR__ . '/../../..' . '/lib/IndexHybrid/Manager.php',
         'IndexHybrid\\Meilisearch\\Index' => __DIR__ . '/../../..' . '/lib/IndexHybrid/Meilisearch/Index.php',
@@ -1707,6 +1741,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'MongoLite\\Aggregation\\Optimizer' => __DIR__ . '/../../..' . '/lib/MongoLite/Aggregation/Optimizer.php',
         'MongoLite\\Aggregation\\ValueAccessor' => __DIR__ . '/../../..' . '/lib/MongoLite/Aggregation/ValueAccessor.php',
         'MongoLite\\Client' => __DIR__ . '/../../..' . '/lib/MongoLite/Client.php',
+        'MongoLite\\ClosureGuard' => __DIR__ . '/../../..' . '/lib/MongoLite/ClosureGuard.php',
         'MongoLite\\Collection' => __DIR__ . '/../../..' . '/lib/MongoLite/Collection.php',
         'MongoLite\\Cursor' => __DIR__ . '/../../..' . '/lib/MongoLite/Cursor.php',
         'MongoLite\\Database' => __DIR__ . '/../../..' . '/lib/MongoLite/Database.php',
@@ -1922,6 +1957,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'PHPStan\\PhpDocParser\\Ast\\PhpDoc\\PhpDocTextNode' => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src/Ast/PhpDoc/PhpDocTextNode.php',
         'PHPStan\\PhpDocParser\\Ast\\PhpDoc\\PropertyTagValueNode' => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src/Ast/PhpDoc/PropertyTagValueNode.php',
         'PHPStan\\PhpDocParser\\Ast\\PhpDoc\\PureUnlessCallableIsImpureTagValueNode' => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src/Ast/PhpDoc/PureUnlessCallableIsImpureTagValueNode.php',
+        'PHPStan\\PhpDocParser\\Ast\\PhpDoc\\PureUnlessParameterIsPassedTagValueNode' => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src/Ast/PhpDoc/PureUnlessParameterIsPassedTagValueNode.php',
         'PHPStan\\PhpDocParser\\Ast\\PhpDoc\\RequireExtendsTagValueNode' => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src/Ast/PhpDoc/RequireExtendsTagValueNode.php',
         'PHPStan\\PhpDocParser\\Ast\\PhpDoc\\RequireImplementsTagValueNode' => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src/Ast/PhpDoc/RequireImplementsTagValueNode.php',
         'PHPStan\\PhpDocParser\\Ast\\PhpDoc\\ReturnTagValueNode' => __DIR__ . '/..' . '/phpstan/phpdoc-parser/src/Ast/PhpDoc/ReturnTagValueNode.php',
@@ -1976,6 +2012,12 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'ParagonIE\\ConstantTime\\Encoding' => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src/Encoding.php',
         'ParagonIE\\ConstantTime\\Hex' => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src/Hex.php',
         'ParagonIE\\ConstantTime\\RFC4648' => __DIR__ . '/..' . '/paragonie/constant_time_encoding/src/RFC4648.php',
+        'Pdo\\Dblib' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Dblib.php',
+        'Pdo\\Firebird' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Firebird.php',
+        'Pdo\\Mysql' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Mysql.php',
+        'Pdo\\Odbc' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Odbc.php',
+        'Pdo\\Pgsql' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Pgsql.php',
+        'Pdo\\Sqlite' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/stubs/Pdo/Sqlite.php',
         'PhpParser\\Builder' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Builder.php',
         'PhpParser\\BuilderFactory' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/BuilderFactory.php',
         'PhpParser\\BuilderHelpers' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/BuilderHelpers.php',
@@ -2015,6 +2057,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'PhpParser\\Lexer\\TokenEmulator\\AttributeEmulator' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Lexer/TokenEmulator/AttributeEmulator.php',
         'PhpParser\\Lexer\\TokenEmulator\\EnumTokenEmulator' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Lexer/TokenEmulator/EnumTokenEmulator.php',
         'PhpParser\\Lexer\\TokenEmulator\\ExplicitOctalEmulator' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Lexer/TokenEmulator/ExplicitOctalEmulator.php',
+        'PhpParser\\Lexer\\TokenEmulator\\FnTokenEmulator' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Lexer/TokenEmulator/FnTokenEmulator.php',
         'PhpParser\\Lexer\\TokenEmulator\\KeywordEmulator' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Lexer/TokenEmulator/KeywordEmulator.php',
         'PhpParser\\Lexer\\TokenEmulator\\MatchTokenEmulator' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Lexer/TokenEmulator/MatchTokenEmulator.php',
         'PhpParser\\Lexer\\TokenEmulator\\NullsafeTokenEmulator' => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser/Lexer/TokenEmulator/NullsafeTokenEmulator.php',
@@ -2299,6 +2342,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'RobThree\\Auth\\Providers\\Time\\TimeException' => __DIR__ . '/..' . '/robthree/twofactorauth/lib/Providers/Time/TimeException.php',
         'RobThree\\Auth\\TwoFactorAuth' => __DIR__ . '/..' . '/robthree/twofactorauth/lib/TwoFactorAuth.php',
         'RobThree\\Auth\\TwoFactorAuthException' => __DIR__ . '/..' . '/robthree/twofactorauth/lib/TwoFactorAuthException.php',
+        'RoundingMode' => __DIR__ . '/..' . '/symfony/polyfill-php84/Resources/RoundingMode.php',
         'SVGSanitizer' => __DIR__ . '/../../..' . '/lib/SVGSanitizer.php',
         'ScriptLite\\Ast\\ArrayLiteral' => __DIR__ . '/../../..' . '/lib/ScriptLite/Ast/ArrayLiteral.php',
         'ScriptLite\\Ast\\AssignExpr' => __DIR__ . '/../../..' . '/lib/ScriptLite/Ast/AssignExpr.php',
@@ -2384,6 +2428,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'ScriptLite\\Vm\\JsThrowable' => __DIR__ . '/../../..' . '/lib/ScriptLite/Vm/JsThrowable.php',
         'ScriptLite\\Vm\\VirtualMachine' => __DIR__ . '/../../..' . '/lib/ScriptLite/Vm/VirtualMachine.php',
         'ScriptLite\\Vm\\VmException' => __DIR__ . '/../../..' . '/lib/ScriptLite/Vm/VmException.php',
+        'SecurityTestRunner' => __DIR__ . '/../../..' . '/lib/MongoLite/tests/callable_closure_security_test.php',
         'SimpleImageLib' => __DIR__ . '/../../..' . '/lib/SimpleImageLib.php',
         'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'SwaggerPhp\\AlternativeDocBlockParser' => __DIR__ . '/../../..' . '/lib/SwaggerPhp/AlternativeDocBlockParser.php',
@@ -2569,11 +2614,14 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Symfony\\Component\\Yaml\\Exception\\RuntimeException' => __DIR__ . '/..' . '/symfony/yaml/Exception/RuntimeException.php',
         'Symfony\\Component\\Yaml\\Inline' => __DIR__ . '/..' . '/symfony/yaml/Inline.php',
         'Symfony\\Component\\Yaml\\Parser' => __DIR__ . '/..' . '/symfony/yaml/Parser.php',
+        'Symfony\\Component\\Yaml\\ParserState' => __DIR__ . '/..' . '/symfony/yaml/ParserState.php',
         'Symfony\\Component\\Yaml\\Tag\\TaggedValue' => __DIR__ . '/..' . '/symfony/yaml/Tag/TaggedValue.php',
         'Symfony\\Component\\Yaml\\Unescaper' => __DIR__ . '/..' . '/symfony/yaml/Unescaper.php',
         'Symfony\\Component\\Yaml\\Yaml' => __DIR__ . '/..' . '/symfony/yaml/Yaml.php',
         'Symfony\\Contracts\\Service\\Attribute\\Required' => __DIR__ . '/..' . '/symfony/service-contracts/Attribute/Required.php',
         'Symfony\\Contracts\\Service\\Attribute\\SubscribedService' => __DIR__ . '/..' . '/symfony/service-contracts/Attribute/SubscribedService.php',
+        'Symfony\\Contracts\\Service\\ContainerAwareInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ContainerAwareInterface.php',
+        'Symfony\\Contracts\\Service\\ContainerProviderInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ContainerProviderInterface.php',
         'Symfony\\Contracts\\Service\\ResetInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ResetInterface.php',
         'Symfony\\Contracts\\Service\\ServiceCollectionInterface' => __DIR__ . '/..' . '/symfony/service-contracts/ServiceCollectionInterface.php',
         'Symfony\\Contracts\\Service\\ServiceLocatorTrait' => __DIR__ . '/..' . '/symfony/service-contracts/ServiceLocatorTrait.php',
@@ -2594,7 +2642,7 @@ class ComposerStaticInitdbf068ea24923eae9780c9654e28dfad
         'Thumbhash' => __DIR__ . '/../../..' . '/lib/Thumbhash.php',
         'TokenVerificationTest' => __DIR__ . '/..' . '/jumbojett/openid-connect-php/tests/TokenVerificationTest.php',
         'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
-        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-intl-grapheme/bootstrap.php',
         'ZipStream\\CentralDirectoryFileHeader' => __DIR__ . '/..' . '/maennchen/zipstream-php/src/CentralDirectoryFileHeader.php',
         'ZipStream\\CompressionMethod' => __DIR__ . '/..' . '/maennchen/zipstream-php/src/CompressionMethod.php',
         'ZipStream\\DataDescriptor' => __DIR__ . '/..' . '/maennchen/zipstream-php/src/DataDescriptor.php',

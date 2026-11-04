@@ -20,7 +20,9 @@ class Buckets extends App {
             return false;
         }
 
-        $bucket = \preg_replace('/[^a-zA-Z0-9-_\.]/','', \str_replace(' ', '-', $bucket));
+        if (!\preg_match('/^[a-zA-Z0-9_-]+$/', $bucket)) {
+            return $this->stop(['error' => 'Invalid bucket name'], 412);
+        }
 
         $this->root = "uploads://buckets/{$bucket}";
 
@@ -50,7 +52,7 @@ class Buckets extends App {
             return $data;
         }
 
-        $dir = $this->root.'/'.$path;
+        $dir = $this->_bucketPath($path);
         $data['path'] = $dir;
 
         if ($this->app->fileStorage->has($dir)){
@@ -114,8 +116,14 @@ class Buckets extends App {
         $name = $this->param('name', false);
         $ret  = false;
 
-        if ($name) {
-            $ret = $this->app->fileStorage->createDirectory($this->root.'/'.$path.'/'.$name);
+        if ($name && $this->_isValidItemName($name)) {
+            $target = $this->_bucketPath(\trim($path ? "{$path}/{$name}" : $name, '/'));
+
+            try {
+                $this->app->fileStorage->createDirectory($target);
+                $ret = $this->app->fileStorage->directoryExists($target);
+            } catch (\Throwable $e) {
+            }
         }
 
         return \json_encode(['success' => $ret]);
@@ -126,18 +134,39 @@ class Buckets extends App {
         $path = $this->_getPathParameter();
 
         if ($path === false) return false;
+        if ($path === '') return \json_encode(['success' => false]);
 
         $name = $this->param('name', false);
+        $success = false;
 
-        if ($name && $this->_isFileTypeAllowed($name)) {
-
-            $source = $this->root.'/'.$path;
-            $target = $this->root.'/'.$name;
-
-            $this->app->fileStorage->move($source, $target);
+        if (!$this->_isValidItemName($name)) {
+            return $this->stop(['error' => 'Invalid file name'], 412);
         }
 
-        return \json_encode(['success' => true]);
+        $source = $this->_bucketPath($path);
+
+        if (
+            !$this->app->fileStorage->fileExists($source) &&
+            !$this->app->fileStorage->directoryExists($source)
+        ) {
+            return \json_encode(['success' => false]);
+        }
+
+        if ($this->app->fileStorage->fileExists($source) && !$this->_isFileTypeAllowed($name)) {
+            return \json_encode(['success' => false]);
+        }
+
+        $dirname = \dirname($path);
+        $targetPath = $dirname === '.' ? $name : "{$dirname}/{$name}";
+        $target = $this->_bucketPath($targetPath);
+
+        try {
+            $this->app->fileStorage->move($source, $target);
+            $success = true;
+        } catch (\Throwable $e) {
+        }
+
+        return \json_encode(['success' => $success]);
     }
 
     protected function removefiles() {
@@ -147,7 +176,13 @@ class Buckets extends App {
 
         foreach ($paths as $path) {
 
-            $delpath = $this->root.'/'.\trim($path, '/');
+            $path = $this->_normalizeRelativePath($path);
+
+            if ($path === false || $path === '') {
+                continue;
+            }
+
+            $delpath = $this->_bucketPath($path);
 
             if ($this->app->fileStorage->directoryExists($delpath)) {
                 $this->app->fileStorage->deleteDirectory($delpath);
@@ -168,7 +203,7 @@ class Buckets extends App {
         if ($path === false) return false;
 
         $files      = $_FILES['files'] ?? [];
-        $targetpath = \trim($this->root.'/'.$path, '/');
+        $targetpath = $this->_bucketPath($path);
         $uploaded   = [];
         $failed     = [];
 
@@ -186,21 +221,30 @@ class Buckets extends App {
 
                 // clean filename
                 $clean = \preg_replace('/[^a-zA-Z0-9-_\.]/','', \str_replace(' ', '-', $files['name'][$i]));
-                $_file  = $this->app->path('#tmp:').'/'.$files['name'][$i];
+                $_file = $this->app->path('#tmp:').'/'.$files['name'][$i];
+                $_mime = null;
 
-                if (!$files['error'][$i] && $this->_isFileTypeAllowed($clean) && \move_uploaded_file($files['tmp_name'][$i], $_file)) {
+                if (!$files['error'][$i] && $finfo) {
+                    $_mime = \finfo_file($finfo, $files['tmp_name'][$i]);
+                    $_mime = $_mime ?: null;
+                }
+
+                if (!$files['error'][$i] && $this->_isFileTypeAllowed($clean, $_mime) && \move_uploaded_file($files['tmp_name'][$i], $_file)) {
+
+                    if (\preg_match('/\.svg$/i', $clean) && !\SVGSanitizer::sanitizeFile($_file)) {
+                        @unlink($_file);
+                        $failed[]  = ['file' => $files['name'][$i], 'error' => 'SVG sanitization failed'];
+                        $_failed[] = $_file;
+                        continue;
+                    }
 
                     $uploaded[]  = $files['name'][$i];
                     $_uploaded[] = $_file;
 
-                    if (\preg_match('/\.(svg|xml)$/i', $clean)) {
-                        \file_put_contents($_file, \SVGSanitizer::clean(\file_get_contents($_file)));
-                    }
-
                     try {
 
                         $opts  = [
-                            'mimetype' => \finfo_file($finfo, $_file)
+                            'mimetype' => $_mime ?: ($finfo ? \finfo_file($finfo, $_file) : null)
                         ];
 
                         $stream = \fopen($_file, 'r+');
@@ -217,10 +261,14 @@ class Buckets extends App {
                     }
 
                 } else {
-                    $failed[]  = ['file' => $files['name'][$i], 'error' => $files['error'][$i]];
+                    $failed[]  = ['file' => $files['name'][$i], 'error' => $files['error'][$i] ?: 'File type not allowed'];
                     $_failed[] = $_file;
                 }
             }
+        }
+
+        if ($finfo) {
+            \finfo_close($finfo);
         }
 
         return \json_encode(['uploaded' => $uploaded, 'failed' => $failed]);
@@ -228,27 +276,88 @@ class Buckets extends App {
 
     protected function _getPathParameter() {
 
-        $path = $this->param('path', false);
-
-        if ($path) {
-
-            $path = \trim(\trim($path, '/'));
-
-            if (\str_contains($path, '../')) {
-                $path = false;
-            }
-        }
-
-        return $path;
+        return $this->_normalizeRelativePath($this->param('path', false));
     }
 
-    protected function _isFileTypeAllowed($file) {
+    protected function _normalizeRelativePath(mixed $path): string|false {
 
-        $allowed = \trim($this->app->retrieve('finder.allowed_uploads', '*'));
-
-        if (\strtolower(\pathinfo($file, PATHINFO_EXTENSION)) == 'php') {
+        if ($path === false || $path === null) {
             return false;
         }
+
+        $path = \trim((string)$path);
+
+        if ($path === '' || $path === '.' || $path === '/') {
+            return '';
+        }
+
+        $path = \str_replace('\\', '/', \trim($path, '/'));
+
+        if (\str_contains($path, "\0")) {
+            return false;
+        }
+
+        $parts = [];
+
+        foreach (\explode('/', $path) as $part) {
+
+            if ($part === '' || $part === '.') {
+                continue;
+            }
+
+            if ($part === '..') {
+                return false;
+            }
+
+            $parts[] = $part;
+        }
+
+        return \implode('/', $parts);
+    }
+
+    protected function _bucketPath(string $path = ''): string {
+        return $path !== '' ? "{$this->root}/{$path}" : $this->root;
+    }
+
+    protected function _isValidItemName(mixed $name): bool {
+
+        if (!\is_string($name)) {
+            return false;
+        }
+
+        $name = \trim($name);
+
+        if ($name === '' || $name === '.' || $name === '..') {
+            return false;
+        }
+
+        if (\str_contains($name, "\0")) {
+            return false;
+        }
+
+        return !\preg_match('/[\/\\\\:*?"<>|]/', $name);
+    }
+
+    protected function _isFileTypeAllowed($file, ?string $mime = null): bool {
+
+        $allowed = $this->app->retrieve('finder.allowed_uploads', '*');
+        $extension = \strtolower(\pathinfo((string)$file, PATHINFO_EXTENSION));
+        $forbiddenExtensions = [
+            'bat', 'exe', 'sh',
+            'php', 'php3', 'php4', 'php5', 'php7', 'php8',
+            'phar', 'phtml', 'phps', 'pht', 'shtml',
+            'htm', 'html', 'xhtml', 'htaccess',
+        ];
+
+        if (\in_array($extension, $forbiddenExtensions, true)) {
+            return false;
+        }
+
+        if (!$this->_isMimeTypeAllowed($mime)) {
+            return false;
+        }
+
+        $allowed = \is_array($allowed) ? $allowed : \trim($allowed);
 
         if ($allowed == '*') {
             return true;
@@ -257,6 +366,23 @@ class Buckets extends App {
         $allowed = \str_replace([' ', ','], ['', '|'], \preg_quote(\is_array($allowed) ? \implode(',', $allowed) : $allowed));
 
         return \preg_match("/\.({$allowed})$/i", $file);
+    }
+
+    protected function _isMimeTypeAllowed(?string $mime): bool {
+
+        if (!$mime) {
+            return true;
+        }
+
+        $forbiddenMimes = [
+            'application/x-httpd-php',
+            'application/x-php',
+            'text/x-php',
+            'text/html',
+            'application/xhtml+xml',
+        ];
+
+        return !\in_array(\strtolower($mime), $forbiddenMimes, true);
     }
 
 }

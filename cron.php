@@ -14,7 +14,7 @@ function _ini_get($name, $default) {
 }
 
 $master = Cockpit::instance();
-$debug  = $master->retrieve('debug',false);
+$debug  = $master->retrieve('debug', false);
 
 // is web based cron execution?
 if (!APP_CLI) {
@@ -84,20 +84,28 @@ if (!APP_CLI) {
             usleep(500000); // 500ms delay
 
             // Get the current URL
-            $url = $master->retrieve('site_url');
-            $url .= ($_SERVER['REQUEST_URI'] ?? '/cron.php');
-            $url .= '?restart='.($restartCount+1);
+            $siteUrl = rtrim($master->retrieve('site_url'), '/');
+            $request = parse_url($_SERVER['REQUEST_URI'] ?? '/cron.php') ?: [];
+            $query = [];
+
+            if (isset($request['query'])) {
+                parse_str($request['query'], $query);
+            }
+
+            $query['restart'] = $restartCount + 1;
 
             if ($webToken) {
-                $url .= "&token={$webToken}";
+                $query['token'] = $webToken;
             }
+
+            $url = $siteUrl.($request['path'] ?? '/cron.php').'?'.http_build_query($query);
 
             // Make an asynchronous request to restart
             $ch = curl_init($url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_TIMEOUT, 1); // Very short timeout
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
             curl_exec($ch);
         }
     });

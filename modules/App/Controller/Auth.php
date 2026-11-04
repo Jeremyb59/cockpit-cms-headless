@@ -8,6 +8,8 @@ namespace App\Controller;
  */
 class Auth extends Base {
 
+    protected const DUMMY_PASSWORD_HASH = '$2y$10$e0NR1Z5J8Q6z1F7G9K8eOe5J8Q6z1F7G9K8eOe5J8Q6z1F7G9K8eO';
+
     protected $layout = 'app:layouts/canvas.php';
 
     protected function before() {
@@ -213,6 +215,10 @@ class Auth extends Base {
             $user = $this->setSessionUser($user);
 
             return ['success' => true, 'user' => $user, 'csrf' => $this->helper('csrf')->token('app.csrf')];
+
+        } else {
+            // dummy password check to prevent timing attacks
+            \password_verify($auth['password'], self::DUMMY_PASSWORD_HASH);
         }
 
         return ['success' => false];

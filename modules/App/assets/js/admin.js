@@ -1,33 +1,3 @@
-
-let checkSessionTimeout = function() {
-
-    if (checkSessionTimeout.idle) {
-        clearTimeout(checkSessionTimeout.idle);
-    }
-
-    let isActive = document.getElementById('app-session-login');
-
-    App.request('/check-session').then(rsp => {
-
-        App.csrf = rsp.csrf || '';
-
-        if (rsp && rsp.status && isActive) {
-            isActive.closest('kiss-dialog').close();
-        }
-
-        if (rsp && !rsp.status && !isActive) {
-            VueView.ui.modal(Vue.defineAsyncComponent(() => import(`${App.route('/auth/dialog')}?v=${App.version}`)));
-        }
-
-    }).catch(rsp => {
-        // todo
-    });
-
-    checkSessionTimeout.idle = setTimeout(checkSessionTimeout, 30000);
-};
-
-checkSessionTimeout.idle = null;
-
 const isUserLoggedOut = () => document.getElementById('app-session-login');
 const isAppSearchActive = () => document.getElementById('app-search');
 
@@ -45,6 +15,9 @@ let showAppSearch = function(value) {
 
 window.AppEventStream =  {
     _idle: null,
+    _interval: 5000,
+    _pending: false,
+    _needsRefresh: false,
     _registry: {
         notify: [
             function(evt) {
@@ -71,24 +44,74 @@ window.AppEventStream =  {
         ]
     },
 
-    start() {
+    _schedule(delay = this._interval) {
 
-        let check = () => {
-
-            App.request('/app-event-stream').then(events => {
-
-                events.forEach(evt => {
-                    this.trigger(evt);
-                });
-
-                this._idle = setTimeout(check, 10000);
-
-            }).catch(rsp => {
-                // todo
-            });
+        if (this._idle) {
+            clearTimeout(this._idle);
         }
 
-        check();
+        this._idle = setTimeout(() => this._check(), delay);
+    },
+
+    _syncSessionState(rsp) {
+
+        let isActive = document.getElementById('app-session-login');
+
+        App.csrf = rsp && rsp.csrf || '';
+
+        if (rsp && rsp.status && isActive) {
+            isActive.closest('kiss-dialog').close();
+        }
+
+        if (rsp && !rsp.status && !isActive) {
+            VueView.ui.modal(Vue.defineAsyncComponent(() => import(`${App.route('/auth/dialog')}?v=${App.version}`)));
+        }
+    },
+
+    _check(force = false) {
+
+        if (this._pending) {
+            this._needsRefresh = this._needsRefresh || force;
+            return;
+        }
+
+        this._pending = true;
+
+        App.request('/app-event-stream').then(rsp => {
+
+            rsp = rsp || {};
+
+            this._syncSessionState(rsp);
+
+            (rsp.events || []).forEach(evt => {
+                this.trigger(evt);
+            });
+        }).catch(() => {
+            // keep polling on transient failures
+        }).finally(() => {
+
+            this._pending = false;
+
+            if (this._needsRefresh) {
+                this._needsRefresh = false;
+                this._check();
+                return;
+            }
+
+            this._schedule();
+        });
+    },
+
+    start() {
+
+        this.stop();
+        this._check(true);
+    },
+
+    refresh() {
+
+        this.stop();
+        this._check(true);
     },
 
     stop() {
@@ -115,7 +138,6 @@ window.AppEventStream =  {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    checkSessionTimeout();
     AppEventStream.start();
 
     // bind global command for app search
@@ -162,7 +184,7 @@ document.addEventListener('visibilitychange', function() {
         return
     }
 
-    checkSessionTimeout();
+    AppEventStream.refresh();
     App.storage.load();
 
 }, false);
